@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<head>
+ <meta charset="utf-8">
+ <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+
+ <!-- Bootstrap -->
+ <link href="css/bootstrap.min.css" rel="stylesheet">
+ <!-- layout style -->
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  
+  
+  
+  
+</head>
+
+
+
+<script>
+function changeTrainingMaps() {
+    var x = document.getElementById("myFile");
+    if(x.disabled == true){
+	x.disabled = false;
+	}else{
+	x.disabled = true;
+	}
+	
+}
+</script>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">HMdMC Site</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li id="homeButton"><a href="#">Home</a></li>
+      <li class="active"><a href="#">Generate Maps</a></li>
+      <li><a href="#">Help</a></li> 
+    </ul>
+  </div>
+</nav>
+
+
+
+
+<section>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#home">Options</a></li>
+  <li><a data-toggle="tab" href="#menu1">Text Output</a></li>
+  <li><a data-toggle="tab" href="#menu2">Graphic Output</a></li>
+</ul>
+
+
+<div class="tab-content">
+  <div id="home" class="tab-pane fade in active">
+    
+	<fieldset class="scheduler-border" id="chooseAGame">
+    <legend class="scheduler-border">Choose a Game</legend>
+		
+		<select class="form-control" id="formChooseAGame">
+    <option value="kidIcarus">Kid Icarus</option>
+    <option value="lorerunner">Lorerunner</option>
+    <option value="superMarioBros">Super Mario Bros</option>
+    <option value="other">Other</option>
+</select>
+		
+  </fieldset>
+  
+  <fieldset class="scheduler-border" id="trainingMaps">
+    <legend class="scheduler-border">Training Maps</legend>
+		
+  <div class="radio" >
+  <label><input type="radio" name="optradio" value="default" checked>Use default training maps</label>
+</div>
+<div class="radio">
+  <label><input type="radio" name="optradio" value="userMaps">Use your own maps</label>
+</div>
+
+<input type="file" id="myFile">
+  </fieldset>
+
+  <fieldset class="scheduler-border" id="chooseAMethod">
+    <legend class="scheduler-border">Choose a Method</legend>
+		<div class="radio" >
+  <label><input type="radio" name="RadioChooseAMethod" value="MdMC" checked> Multi-Dimensional Markov chains (MdMC)<br></label>
+  </div>
+  <div class="radio" >
+  <label><input type="radio" name="RadioChooseAMethod" value="HMdMC"> Hierarchical Multi-Dimensional Markov chains (HMdMC)<br></label>
+  </div>
+  <div class="radio" >
+  <label><input type="radio" name="RadioChooseAMethod" value="MRF"> Markov Random Fields (MRF)<br></label>
+  </div>
+
+  </fieldset>
+  
+  <fieldset class="scheduler-border" id="mapSize">
+    <legend class="scheduler-border">Map Size</legend>
+		
+		<div class="input-group">
+  <span class="input-group-addon" id="height">Height</span>
+  <input type="text" class="form-control"  aria-describedby="height">
+</div>
+<br>
+		<div class="input-group">
+  <span class="input-group-addon" id="width">Width&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="width">
+</div>
+  </fieldset>
+	
+	
+	
+	<fieldset class="scheduler-border" id="experimentalSetUps">
+    <legend class="scheduler-border">Experimental Set-Ups</legend>
+		
+		<div id="experimentalOptions">
+		
+		<div class="input-group">
+  <span class="input-group-addon" id="rowSplits">Row Splits&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="rowSplits">
+</div>
+<br>
+<div class="input-group">
+  <span class="input-group-addon" id="lookahead">Lookahead&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="lookahead">
+</div>
+<br>	
+<div class="input-group">
+  <span class="input-group-addon" id="numberOfClusters">Number of Clusters</span>
+  <input type="text" class="form-control"  aria-describedby="numberOfClusters">
+</div>	
+		
+		</div>
+		
+		<div id="experimentalOptions">
+		
+		
+		<div class="input-group">
+  <span class="input-group-addon" id="distanceMetric">Distance Metric&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="distanceMetric">
+</div>
+<br>
+<div class="input-group">
+  <span class="input-group-addon" id="tileSize">Tile Size&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="tileSize">
+</div>
+		
+		
+		</div>
+		
+		<fieldset class="scheduler-border" id="experimentalFieldset">
+    <legend class="scheduler-border">Converting to High-Level Maps</legend>
+		
+		<div id="highLevelConvertion">
+		
+		<div class="radio" >
+  <label><input type="radio" name="optradioExperimental" value="manual" checked>Manual</label>
+  </div>
+  </div>
+  
+  <div id="highLevelConvertion2">
+  
+  <div class="input-group">
+  <span class="input-group-addon" id="Parameters">Parameters</span>
+  <input type="text" class="form-control"  aria-describedby="Parameters">
+</div>
+</div>
+		
+		
+		
+		<div id="highLevelConvertion">
+		
+		<div class="radio">
+  <label><input type="radio" name="optradioExperimental" value="clusteringBased">Clustering-based</label>
+</div>	
+		
+		</div>
+		
+		
+		 <div id="highLevelConvertion2">
+		 
+		 <select class="form-control" id="formHighLevelConvertion">
+    <option value="direct">Direct</option>
+    <option value="histogram">Histogram</option>
+    <option value="markov">Markov</option>
+    <option value="shape">Shape</option>
+	<option value="weighted">Weighted</option>	
+</select>
+		
+		 
+		 </div>
+		
+		</fieldset>
+
+  </fieldset>
+	
+	
+	<div id="divButtons">
+	<button type="button" class="btn btn-primary btn-block" >Training Maps</button>
+	</div>
+	<div id="divButtons2">
+	<button type="button" class="btn btn-primary btn-block" >Sampling Maps</button>
+	</div>
+	
+	
+  </div>
+  <div id="menu1" class="tab-pane fade">
+    
+    <p>TEXT.</p>
+	
+  </div>
+  <div id="menu2" class="tab-pane fade">
+    
+    <p>GRAPHIC.</p>
+	
+  </div>
+</div>
+
+
+  
+  
+</section>
+
+
+<footer>
+Drexel 2016 
+</footer>
+
+</body>
+
+</html>
