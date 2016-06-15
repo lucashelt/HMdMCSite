@@ -38,6 +38,7 @@ function samplingReady(){
 	var samplingMapsButton = document.getElementById("samplingMapsButton");
 	
 	samplingMapsButton.disabled = false;
+	MdMCExperiments();
 }
 
 function changeToMRF(){
@@ -138,6 +139,35 @@ function samplesGenerated(){
 	saveGraphic.disabled = false;
 
 }
+
+
+function MdMCExperiments(){
+	var trainingFolderNameValue = document.getElementById("myFile").value;
+	var rowSplitsValue = document.getElementById("rowSplits").value;
+	var lookaheadValue = document.getElementById("lookahead").value; 
+	var networkStructureValue = "2"; 
+	var trainingMapsValue = "10"; 
+	var toGenerateValue = "100"; 
+	var heightValue = document.getElementById("height").value; 
+	var widthValue = document.getElementById("width").value;
+	var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
+
+if(userYourOwnMapsRadio.checked == true){
+
+	if(trainingFolderNameValue != ""){
+		alert("MdMCExperiments("+ trainingFolderNameValue + ", " + rowSplitsValue + ", " + lookaheadValue + ", " + trainingMapsValue + ", " + toGenerateValue + ", " + heightValue + ", " + widthValue + ")");
+	}
+	else
+	{
+		alert("Please choose the Training Maps Folder!");
+	}
+}
+else{
+	alert("MdMCExperiments(DefaultFolder" + ", " + rowSplitsValue + ", " + lookaheadValue + ", " + trainingMapsValue + ", " + toGenerateValue + ", " + heightValue + ", " + widthValue + ")");
+}
+
+
+}
 </script>
 
 <body>
@@ -191,7 +221,7 @@ function samplesGenerated(){
   <label><input type="radio" name="optradio" value="default" checked onchange="changeTrainingMaps()">Use default training maps</label>
 </div>
 <div class="radio">
-  <label><input type="radio" name="optradio" value="userMaps" onchange="changeTrainingMaps()">Use your own maps</label>
+  <label><input type="radio" name="optradio" value="userMaps" onchange="changeTrainingMaps()" id = "userYourOwnMapsRadio">Use your own maps</label>
 </div>
 
 <input type="file" id="myFile" disabled = true>
@@ -215,13 +245,13 @@ function samplesGenerated(){
     <legend class="scheduler-border">Map Size</legend>
 		
 		<div class="input-group">
-  <span class="input-group-addon" id="height">Height</span>
-  <input type="text" class="form-control"  aria-describedby="height" value = "12">
+  <span class="input-group-addon" >Height</span>
+  <input type="text" class="form-control" id="height" aria-describedby="height" value = "12">
 </div>
 <br>
 		<div class="input-group">
-  <span class="input-group-addon" id="width">Width&nbsp</span>
-  <input type="text" class="form-control"  aria-describedby="width" value = "210">
+  <span class="input-group-addon" >Width&nbsp</span>
+  <input type="text" class="form-control" id = "width" aria-describedby="width" value = "210">
 </div>
   </fieldset>
 	
