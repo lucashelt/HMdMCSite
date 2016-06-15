@@ -1,4 +1,9 @@
 
+#container{
+	 width:1300px;
+  height:800px
+  background-color:red;
+}
 
 body { 
 position:absolute; 
@@ -70,8 +75,8 @@ padding-top:5px;
 	height: 30px;
 	 position: fixed;
     margin-top: -150px; /* negative value of footer height */
-    height: 20px;
-   font-size: 10px;
+    height: 25px;
+   font-size: 11px;
     bottom:0px;
     width:100%;
 	
@@ -203,7 +208,7 @@ margin-top:50px;
 }
 
 #divText{
-	padding-top:60px;
+	padding-top:40px;
 	margin-left: 40px;
 	height: 300px;
 	width:1222px;
