@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+<head>
+ <meta charset="utf-8">
+ <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+
+ <!-- Bootstrap -->
+ <link href="css/bootstrap.min.css" rel="stylesheet">
+ <!-- layout style -->
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  
+  
+  <title>Generate Maps</title>
+  
+</head>
+
+
+
+<script>
+function changeTrainingMaps() {
+    var x = document.getElementById("myFile");
+    if(x.disabled == true){
+	x.disabled = false;
+	}else{
+	x.disabled = true;
+	}
+	
+}
+
+function samplingReady(){
+	var samplingMapsButton = document.getElementById("samplingMapsButton");
+	
+	samplingMapsButton.disabled = false;
+}
+
+function changeToMRF(){
+	var rowSplits = document.getElementById("rowSplits"); 
+	var lookahead = document.getElementById("lookahead");
+	var numberOfClusters = document.getElementById("numberOfClusters");
+	var distanceMetric = document.getElementById("distanceMetric");
+	var tileSize = document.getElementById("tileSize");
+	var manualRadio = document.getElementById("manualRadio");
+	var parameters = document.getElementById("parameters");
+	var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+	var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+
+	rowSplits.disabled = true;
+	lookahead.disabled = true;
+	numberOfClusters.disabled = true;
+	distanceMetric.disabled = true;
+	tileSize.disabled = true;
+	manualRadio.disabled = true;
+	parameters.disabled = true;
+	clusteringBasedRadio.disabled = true;
+	formHighLevelConvertion.disabled = true;
+
+}
+
+function changeToMdMC(){
+	var rowSplits = document.getElementById("rowSplits"); 
+	var lookahead = document.getElementById("lookahead");
+	var numberOfClusters = document.getElementById("numberOfClusters");
+	var distanceMetric = document.getElementById("distanceMetric");
+	var tileSize = document.getElementById("tileSize");
+	var manualRadio = document.getElementById("manualRadio");
+	var parameters = document.getElementById("parameters");
+	var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+	var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+
+	rowSplits.disabled = false;
+	lookahead.disabled = false;
+	numberOfClusters.disabled = true;
+	distanceMetric.disabled = true;
+	tileSize.disabled = true;
+	manualRadio.disabled = true;
+	parameters.disabled = true;
+	clusteringBasedRadio.disabled = true;
+	formHighLevelConvertion.disabled = true;
+
+}
+
+function changeToHMdMC(){
+	var rowSplits = document.getElementById("rowSplits"); 
+	var lookahead = document.getElementById("lookahead");
+	var numberOfClusters = document.getElementById("numberOfClusters");
+	var distanceMetric = document.getElementById("distanceMetric");
+	var tileSize = document.getElementById("tileSize");
+	var manualRadio = document.getElementById("manualRadio");
+	var parameters = document.getElementById("parameters");
+	var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+	var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+
+	rowSplits.disabled = false;
+	lookahead.disabled = false;
+	numberOfClusters.disabled = false;
+	distanceMetric.disabled = false;
+	tileSize.disabled = false;
+	manualRadio.disabled = false;
+	parameters.disabled = false;
+	clusteringBasedRadio.disabled = false;
+	formHighLevelConvertion.disabled = true;
+	
+	manualRadio.checked = true;
+	clusteringBasedRadio.checked = false;
+
+}
+
+function changeHighLevelMapsConvertion(){
+var manualRadio = document.getElementById("manualRadio");
+	var parameters = document.getElementById("parameters");
+	var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+	var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+
+	if(parameters.disabled == true){
+		parameters.disabled = false;
+		formHighLevelConvertion.disabled = true;
+	}
+	else{
+	parameters.disabled = true;
+		formHighLevelConvertion.disabled = false;
+	}
+	
+}
+
+function samplesGenerated(){
+
+	var saveText = document.getElementById("saveText");
+	var saveGraphic = document.getElementById("saveGraphic");
+
+	saveText.disabled = false;
+	saveGraphic.disabled = false;
+
+}
+</script>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="home.html">HMdMC Site</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li id="homeButton"><a href="home.html">Home</a></li>
+      <li class="active"><a href="#">Generate Maps</a></li>
+      <li><a href="help.html">Help</a></li> 
+    </ul>
+  </div>
+</nav>
+
+
+
+
+<section>
+
+<ul class="nav nav-tabs" >
+  <li class="active" ><a data-toggle="tab" href="#home">Options</a></li>
+  <li><a data-toggle="tab" href="#menu1">Text Output</a></li>
+  <li><a data-toggle="tab" href="#menu2">Graphic Output</a></li>
+</ul>
+
+
+<div class="tab-content">
+  <div id="home" class="tab-pane fade in active">
+    
+	<fieldset class="scheduler-border" id="chooseAGame">
+    <legend class="scheduler-border">Choose a Game</legend>
+		
+		<select class="form-control" id="formChooseAGame">
+    <option value="kidIcarus">Kid Icarus</option>
+    <option value="lorerunner">Loderunner</option>
+    <option value="superMarioBros">Super Mario Bros</option>
+    <option value="other">Other</option>
+</select>
+		
+  </fieldset>
+  
+  <fieldset class="scheduler-border" id="trainingMaps">
+    <legend class="scheduler-border">Training Maps</legend>
+		
+  <div class="radio" >
+  <label><input type="radio" name="optradio" value="default" checked onchange="changeTrainingMaps()">Use default training maps</label>
+</div>
+<div class="radio">
+  <label><input type="radio" name="optradio" value="userMaps" onchange="changeTrainingMaps()">Use your own maps</label>
+</div>
+
+<input type="file" id="myFile" disabled = true>
+  </fieldset>
+
+  <fieldset class="scheduler-border" id="chooseAMethod">
+    <legend class="scheduler-border">Choose a Method</legend>
+		<div class="radio" >
+  <label><input type="radio" name="RadioChooseAMethod" value="MdMC" checked onchange="changeToMdMC()"> Multi-Dimensional Markov chains (MdMC)<br></label>
+  </div>
+  <div class="radio" >
+  <label><input type="radio" name="RadioChooseAMethod" value="HMdMC" onchange="changeToHMdMC()"> Hierarchical Multi-Dimensional Markov chains (HMdMC)<br></label>
+  </div>
+  <div class="radio" >
+  <label><input type="radio" name="RadioChooseAMethod" value="MRF" onchange="changeToMRF()"> Markov Random Fields (MRF)<br></label>
+  </div>
+
+  </fieldset>
+  
+  <fieldset class="scheduler-border" id="mapSize">
+    <legend class="scheduler-border">Map Size</legend>
+		
+		<div class="input-group">
+  <span class="input-group-addon" id="height">Height</span>
+  <input type="text" class="form-control"  aria-describedby="height">
+</div>
+<br>
+		<div class="input-group">
+  <span class="input-group-addon" id="width">Width&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="width">
+</div>
+  </fieldset>
+	
+	
+	
+	<fieldset class="scheduler-border" id="experimentalSetUps">
+    <legend class="scheduler-border">Experimental Set-Ups</legend>
+		
+		<div id="experimentalOptions">
+		
+		<div class="input-group">
+  <span class="input-group-addon" >Row Splits&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits">
+</div>
+<br>
+<div class="input-group">
+  <span class="input-group-addon" >Lookahead&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="lookahead" id="lookahead">
+</div>
+<br>	
+<div class="input-group">
+  <span class="input-group-addon" >Number of Clusters</span>
+  <input type="text" class="form-control"  aria-describedby="numberOfClusters" id="numberOfClusters" disabled = true>
+</div>	
+		
+		</div>
+		
+		<div id="experimentalOptions">
+		
+		
+		<div class="input-group">
+  <span class="input-group-addon" >Distance Metric&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="distanceMetric" id="distanceMetric" disabled = true>
+</div>
+<br>
+<div class="input-group">
+  <span class="input-group-addon" >Tile Size&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+  <input type="text" class="form-control"  aria-describedby="tileSize"  id="tileSize" disabled = true>
+</div>
+		
+		
+		</div>
+		
+		<fieldset class="scheduler-border" id="experimentalFieldset">
+    <legend class="scheduler-border">Converting to High-Level Maps</legend>
+		
+		<div id="highLevelConvertion">
+		
+		<div class="radio" >
+  <label><input type="radio" name="optradioExperimental" value="manual" checked disabled = true id="manualRadio" onchange = "changeHighLevelMapsConvertion()">Manual</label>
+  </div>
+  </div>
+  
+  <div id="highLevelConvertion2">
+  
+  <div class="input-group">
+  <span class="input-group-addon"  >Parameters</span>
+  <input type="text" class="form-control"  aria-describedby="Parameters" id="parameters" disabled = true>
+</div>
+</div>
+		
+		
+		
+		<div id="highLevelConvertion">
+		
+		<div class="radio">
+  <label><input type="radio" name="optradioExperimental" value="clusteringBased" disabled = true id="clusteringBasedRadio" onchange = "changeHighLevelMapsConvertion()">Clustering-based</label>
+</div>	
+		
+		</div>
+		
+		
+		 <div id="highLevelConvertion2">
+		 
+		 <select class="form-control" id="formHighLevelConvertion" disabled = true>
+    <option value="direct">Direct</option>
+    <option value="histogram">Histogram</option>
+    <option value="markov">Markov</option>
+    <option value="shape">Shape</option>
+	<option value="weighted">Weighted</option>	
+</select>
+		
+		 
+		 </div>
+		
+		</fieldset>
+
+  </fieldset>
+	
+	
+	<div id="divButtons">
+	<button type="button" class="btn btn-primary btn-block" id="trainingMapsButton" onclick = "samplingReady()">Training Maps</button>
+	</div>
+	<div id="divButtons2">
+	<button type="button" class="btn btn-primary btn-block" id="samplingMapsButton" disabled = true onclick = "samplesGenerated()">Sampling Maps</button>
+	</div>
+	
+	
+  </div>
+  <div id="menu1" class="tab-pane fade" >
+    
+	<div id="textOutputTab">
+    
+	</div>
+	<div id="divButtons2">
+	<button type="button" class="btn btn-primary btn-block" id="saveText" disabled = true>Save Text Output</button>
+	</div>
+	
+  </div>
+  <div id="menu2" class="tab-pane fade" id="graphicOutputTab" >
+    
+    <div id="textOutputTab">
+    
+	</div>
+	<div id="divButtons2">
+	<button type="button" class="btn btn-primary btn-block" id="saveGraphic" disabled = true>Save Graphic Output</button>
+	</div>
+	
+  </div>
+</div>
+
+
+  
+  
+</section>
+
+
+<footer>
+Drexel 2016 
+</footer>
+
+</body>
+
+</html>

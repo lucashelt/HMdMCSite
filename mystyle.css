@@ -1,7 +1,4 @@
-html { 
-height:100%;
-width: 100%; 
-}
+
 
 body { 
 position:absolute; 
@@ -27,7 +24,6 @@ header{
   height:50px !important;
   min-height:50px !important;
 }
-
 
 
 fieldset.scheduler-border {
@@ -74,8 +70,8 @@ padding-top:5px;
 	height: 30px;
 	 position: fixed;
     margin-top: -150px; /* negative value of footer height */
-    height: 30px;
-   
+    height: 20px;
+   font-size: 10px;
     bottom:0px;
     width:100%;
 	
@@ -87,7 +83,7 @@ padding-top:5px;
 
 #chooseAGame{
 	
-	margin-top:10px;
+	margin-top:22px;
 	height: 160px;
 	width: 203px;
 	float: left;
@@ -96,7 +92,7 @@ padding-top:5px;
 
 
 #trainingMaps{
-	margin-top:10px;
+	margin-top:22px;
 	height: 160px;
 	width: 350px;
 	float: left;
@@ -105,7 +101,7 @@ padding-top:5px;
 }
 
 #chooseAMethod{
-	margin-top:10px;
+	margin-top:22px;
 	height: 160px;
 	width: 420px;
 	float: left;
@@ -114,7 +110,7 @@ padding-top:5px;
 
 #mapSize{
 	
-	margin-top:10px;
+	margin-top:22px;
 	height: 160px;
 	width: 210px;
 	float: left;
@@ -188,7 +184,7 @@ height: 40px;
 }
 
 #textOutputTab{
-	margin-top:20px;
+	margin-top:32px;
 	margin-left:40px;
 height: 480px;
 	width: 1222px;
@@ -196,6 +192,26 @@ height: 480px;
 	border:1px;
 border-style:solid;
 border-color:rgb(135,135,135);
+}
+
+.carousel-inner > .item > img {
+    margin: 0 auto;
+}
+
+#myCarousel{
+margin-top:50px;	
+}
+
+#divText{
+	padding-top:60px;
+	margin-left: 40px;
+	height: 300px;
+	width:1222px;
+}
+
+#pHome{
+	padding-top: 20px;
+	color: rgb(55,55,55);
 }
 
 #divMapSize{
