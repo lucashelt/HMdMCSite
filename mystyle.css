@@ -214,6 +214,30 @@ margin-top:50px;
 	color: rgb(55,55,55);
 }
 
+
+#howToUse{
+	
+	margin-top:15px;
+	height: 280px;
+	width: 1222px;
+	float: left;
+	margin-left:40px;
+}
+
+#info{
+	font-size: 15px;
+	text-align:center;
+	margin-top:5px;
+	height: 210px;
+	width: 340px;
+	float: left;
+	margin-left:40px;
+}
+
+#photo{
+	width:150px;height:150px;
+}
+
 #divMapSize{
 	
 }

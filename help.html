@@ -40,7 +40,74 @@
   </div>
 </nav>
 
+<section>
 
+ <fieldset class="scheduler-border" id="howToUse">
+    <legend class="scheduler-border">How to use</legend>
+	
+	<p> 1) Training: In order to train an MdMC, we first need
+to specify the network structure, ns, or the set of previous
+states upon which the current state depends (e.g., a chain
+where each tile depends only on the previous horizontal tile (a
+standard Markov chain), a chain where each tile depends on
+the previous horizontal tile as well as the previous vertical tile,
+or further complicated structures). Figure 4 shows the different
+network structures that we used in our experiments. Though
+more complicated structures could be devised, increasing the
+complexity of the network structure exponentially increases
+the number tile configurations possible, corresponding to the
+number of positions in the probability table that need to be estimated
+from the data. This results in a need for more training
+data to properly estimate the parameters of the MdMC </p>
+
+<p>2) Sampling: Sampling a map using a Markov random field
+requires a vastly different approach than our previous sampling
+algorithms, because MRFs are inherently not sequential. Our
+sampler implements the Metropolis-Hasting algorithm [14].
+For completeness, Algorithm 7 shows the algorithm applied
+to map generation. The algorithm starts by initializing a map
+with each tile chosen using the single tile distribution observed
+in the training maps (P0), corresponding to a network structure
+with no dependencies. Modifications are made to the map by
+choosing two positions in the map randomly, and swapping
+the tile types located there. The tile swap is accepted with
+probability equal to min(1, e
+log(Ppost )−log(Ppre )
+). The swapping
+procedure is repeated until each location in the map has
+been chosen b times, after which the map is returned. Unlike
+the previous models, our MRFs do not sample sequentially,
+and, thus, do not employ a lookahead nor fallback.
+ </p>
+	
+</fieldset>
+	
+	<fieldset class="scheduler-border" id="howToUse">
+    <legend class="scheduler-border">Contacts</legend>
+	<div id = "info">
+	
+	<img src="images/circle.png" alt="person" id = "photo" href = "#">
+	<h4>Title: First Middle Last </h4>
+	<p>  
+	 E-mail: email@drexel.edu </p>
+	</div>
+	
+		<div id = "info">
+	<img src="images/circle.png" alt="person" id = "photo" href = "#">
+	<h4> Title: First Middle Last </h4>
+	<p>   
+	 E-mail: email@drexel.edu </p>
+	</div>
+	
+		<div id = "info">
+	<img src="images/circle.png" alt="person" id = "photo" href = "#">
+	<h4> Title: First Middle Last </h4>
+	<p>   
+	 E-mail: email@drexel.edu </p>
+	</div>
+	</fieldset>
+	
+</section>
 
 
 
