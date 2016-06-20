@@ -41,9 +41,18 @@
 		}
 
 		function samplingReady(){
+
+			tileTypes = [];
+
+			var file = document.getElementById("fileinput").files[0];
+			if(file){
 			var samplingMapsButton = document.getElementById("samplingMapsButton");
 			samplingMapsButton.disabled = false;
 			MdMCExperiments();
+			}
+			else{
+				alert("Please choose Training Maps!");
+			}
 		}
 
 		function changeToMRF(){
