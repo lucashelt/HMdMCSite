@@ -41,11 +41,11 @@
 		}
 
 		function samplingReady(){
-
+			var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
 			tileTypes = [];
 
 			var file = document.getElementById("fileinput").files[0];
-			if(file){
+			if(file && userYourOwnMapsRadio.checked == true || userYourOwnMapsRadio.checked == false){
 			var samplingMapsButton = document.getElementById("samplingMapsButton");
 			samplingMapsButton.disabled = false;
 			MdMCExperiments();
