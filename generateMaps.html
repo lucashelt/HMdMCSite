@@ -27,8 +27,33 @@
 
 	<script>
 
+		var choseGame;
+
+		var MdMC = true;
+		var HMdMC = false;
+		var MRF = false;
+
 		var fileContent;
 		var tileTypes = [];
+		var hierTileTypes = [];
+		var TopDown = false;
+		var NumberMatrices = 0;
+		var DependencyMatrices = [];
+		var DepComplexities = [];
+		var Hierarchical = false;
+		var Rows = [];
+
+
+		var Totals = [];
+		var Probabilities = [];
+		var HierTotals = [];
+		var HierProbabilities = [];
+
+		var TotalMatrix = [];
+		var ProbMatrix = [];
+		var HierTotalMatrix = [];
+		var HierProbMatrix = [];
+		var NumberOfRowSplits = 1;
 
 		function changeTrainingMaps() {
 			var x = document.getElementById("fileinput");
@@ -46,128 +71,220 @@
 
 			var file = document.getElementById("fileinput").files[0];
 			if(file && userYourOwnMapsRadio.checked == true || userYourOwnMapsRadio.checked == false){
-			var samplingMapsButton = document.getElementById("samplingMapsButton");
-			samplingMapsButton.disabled = false;
-			MdMCExperiments();
+				var samplingMapsButton = document.getElementById("samplingMapsButton");
+				samplingMapsButton.disabled = false;
+				MdMCExperiments();
 			}
 			else{
 				alert("Please choose Training Maps!");
 			}
 		}
 
-		function changeToMRF(){
-			var rowSplits = document.getElementById("rowSplits"); 
-			var lookahead = document.getElementById("lookahead");
-			var numberOfClusters = document.getElementById("numberOfClusters");
-			var distanceMetric = document.getElementById("distanceMetric");
-			var tileSize = document.getElementById("tileSize");
-			var manualRadio = document.getElementById("manualRadio");
-			var parameters = document.getElementById("parameters");
-			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
-			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+		
 
-			rowSplits.disabled = true;
-			lookahead.disabled = true;
-			numberOfClusters.disabled = true;
-			distanceMetric.disabled = true;
-			tileSize.disabled = true;
-			manualRadio.disabled = true;
-			parameters.disabled = true;
-			clusteringBasedRadio.disabled = true;
-			formHighLevelConvertion.disabled = true;
 
-		}
+		function ResizeVectors(hier){
 
-		function changeToMdMC(){
-			var rowSplits = document.getElementById("rowSplits"); 
-			var lookahead = document.getElementById("lookahead");
-			var numberOfClusters = document.getElementById("numberOfClusters");
-			var distanceMetric = document.getElementById("distanceMetric");
-			var tileSize = document.getElementById("tileSize");
-			var manualRadio = document.getElementById("manualRadio");
-			var parameters = document.getElementById("parameters");
-			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
-			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
-
-			rowSplits.disabled = false;
-			lookahead.disabled = false;
-			numberOfClusters.disabled = true;
-			distanceMetric.disabled = true;
-			tileSize.disabled = true;
-			manualRadio.disabled = true;
-			parameters.disabled = true;
-			clusteringBasedRadio.disabled = true;
-			formHighLevelConvertion.disabled = true;
-
-		}
-
-		function changeToHMdMC(){
-			var rowSplits = document.getElementById("rowSplits"); 
-			var lookahead = document.getElementById("lookahead");
-			var numberOfClusters = document.getElementById("numberOfClusters");
-			var distanceMetric = document.getElementById("distanceMetric");
-			var tileSize = document.getElementById("tileSize");
-			var manualRadio = document.getElementById("manualRadio");
-			var parameters = document.getElementById("parameters");
-			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
-			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
-
-			rowSplits.disabled = false;
-			lookahead.disabled = false;
-			numberOfClusters.disabled = false;
-			distanceMetric.disabled = false;
-			tileSize.disabled = false;
-			manualRadio.disabled = false;
-			parameters.disabled = false;
-			clusteringBasedRadio.disabled = false;
-			formHighLevelConvertion.disabled = true;
-
-			manualRadio.checked = true;
-			clusteringBasedRadio.checked = false;
-
-		}
-
-		function changeHighLevelMapsConvertion(){
-			var manualRadio = document.getElementById("manualRadio");
-			var parameters = document.getElementById("parameters");
-			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
-			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
-
-			if(parameters.disabled == true){
-				parameters.disabled = false;
-				formHighLevelConvertion.disabled = true;
+			Totals.length = NumberMatrices;
+			Probabilities.length = NumberMatrices;
+			if (hier){
+				HierTotals.length = NumberMatrices;
+				HierProbabilities.length = NumberMatrices;
 			}
-			else{
-				parameters.disabled = true;
-				formHighLevelConvertion.disabled = false;
+		}
+
+
+		function SetTotalsTopLevel(){
+
+
+		}
+
+		function InitFiles(WhichDepMat){
+
+			TotalMatrix.push([]);
+			ProbMatrix.push([]);
+
+			HierTotalMatrix.push([]);
+			HierProbMatrix.push([]);
+
+			if(Hierarchical == false)
+				for(var k = 0; k < NumberOfRowSplits; k++){
+
+					TotalMatrix[WhichDepMat].push([]);
+					ProbMatrix[WhichDepMat].push([]);
+
+					for (var i = 0; i < Rows[WhichDepMat]; i++){
+
+						TotalMatrix[WhichDepMat][k].push([]);
+						ProbMatrix[WhichDepMat][k].push([]);
+
+						for (var j = 0; j <= tileTypes.length; j++){
+							if(j < tileTypes.length){
+								ProbMatrix[WhichDepMat][k][i].push(0);
+							}
+							TotalMatrix[WhichDepMat][k][i].push(0);
+						}
+					}
+				}else{
+					for(var k = 0; k < NumberOfRowSplits; k++){
+
+						HierTotalMatrix[WhichDepMat].push([]);
+						HierProbMatrix[WhichDepMat].push([]);
+
+						for (var i = 0; i < Rows[WhichDepMat]; i++){
+
+							HierTotalMatrix[WhichDepMat][k].push([]);
+							HierProbMatrix[WhichDepMat][k].push([]);
+
+							for (var j = 0; j <= hierTileTypes.length; j++){
+								if(j < hierTileTypes.length){
+									HierProbMatrix[WhichDepMat][k][i].push(0);
+								}
+								HierTotalMatrix[WhichDepMat][k][i].push(0);
+							}
+						}
+					}
+				}
+
+
+				//document.getElementById("textOutputTab").innerHTML = TotalMatrix;
 			}
 
-		}
+			function SetRows(hier){
+				var types = 0;
 
-		function samplesGenerated(){
+				if(hier == true){
+					types = hierTileTypes.length;
+				}else{
+					types = tileTypes.length;
+				}
+
+				for (var i = 0; i < NumberMatrices; i++){
+					Rows.push(1);
+					for (var j = 0; j < DepComplexities[i]; j++)
+						Rows[i] *= types;
+
+				}
+
+			//document.getElementById("textOutputTab").innerHTML = Rows;
+		}
+		
+		function SetDepMatrix(DepMatrix){
+
+			var TempDepMat = [[],[],[],[],[]];
+			for (var i = 0; i < 5; i++)
+				TempDepMat[i].length = 3;
+
+	for (var i = 0; i < 5; i++){			//initialize array to all 0's
+		for (var j = 0; j < 3; j++)
+			TempDepMat[i][j] = 0;
+	}
+	TempDepMat[2][2] = 2;				//block we are finding the probability for
+	
+	if (TopDown == false){				//if we are generating from the top down...	
+		if (DepMatrix == 1)				//use the previous block to determine probability
+			TempDepMat[2][1] = 1;
+		else if (DepMatrix == 2){		//use the previous block and the block above to determine probability
+			TempDepMat[2][1] = 1;	//previous
+			TempDepMat[1][2] = 1;	//above
+		} else if (DepMatrix == 3){		//use previous block, and previous above block, and above block to determine probability
+			TempDepMat[2][1] = 1;	//previous
+			TempDepMat[1][1] = 1;	//previous above
+			TempDepMat[1][2] = 1;	//above
+		} 						
+	}else{					//if we are generating from the bottom up
+		
+		if (DepMatrix == 1)			//only use the previous block to determine probability
+			TempDepMat[2][1] = 1;
+        else if (DepMatrix == 2){		//use the previous block and the block below to determine probability
+			TempDepMat[2][1] = 1;	//previous
+			TempDepMat[3][2] = 1;	//below
+		} else if (DepMatrix == 3){		//use previous block, and previous below block, and below block to determine probability
+			TempDepMat[2][1] = 1;	//previous
+			TempDepMat[3][1] = 1;	//previous below
+			TempDepMat[3][2] = 1;	//below
+		}
+	}
+
+	NumberMatrices++;
+	DependencyMatrices.push(TempDepMat);
+
+	if(DepMatrix == 0)
+		DepComplexities.push(0);
+	else if(DepMatrix == 1)
+		DepComplexities.push(1);
+	else if(DepMatrix == 2)
+		DepComplexities.push(2);
+	else if(DepMatrix == 3)
+		DepComplexities.push(3);
+
+
+//document.getElementById("textOutputTab").innerHTML = DependencyMatrices;
+
+}
+
+
+
+function samplesGenerated(){
 
 			//alert(fileContent);
 			//tileTypes.indexOf("a");
 
+
+			var networkStructure = 1;
+
+			Hierarchical = HMdMC;
+
+			NumberOfRowSplits = document.getElementById("rowSplits").value;
+
+
+			//------------------------- FIND TILES TYPES ----------------------------------
+
+			
 			var strLength = fileContent.length;
 			var c;
 
 			
-
-			for(var i = 0; i < strLength; i++){
-				c = fileContent[i];
-				if(tileTypes.indexOf(fileContent[i]) == -1 && c != '\n' && c != '\t' && c != '\r'){
-					tileTypes.push(fileContent[i]);
+			if(Hierarchical == false){
+				for(var i = 0; i < strLength; i++){
+					c = fileContent[i];
+					if(tileTypes.indexOf(fileContent[i]) == -1 && c != '\n' && c != '\t' && c != '\r'){
+						tileTypes.push(fileContent[i]);
+					}
 				}
-			}
 
-			if(tileTypes.indexOf('S') == -1){
-				tileTypes.push('S');	
+				if(tileTypes.indexOf('S') == -1){
+					tileTypes.push('S');	
+				}
+			}else{
+				for(var i = 0; i < strLength; i++){
+					c = fileContent[i];
+					if(hierTileTypes.indexOf(fileContent[i]) == -1 && c != '\n' && c != '\t' && c != '\r'){
+						hierTileTypes.push(fileContent[i]);
+					}
+				}
+
+				if(hierTileTypes.indexOf('S') == -1){
+					hierTileTypes.push('S');	
+				}
+
 			}
 			
-
+			
 			//document.getElementById("textOutputTab").innerHTML = fileContent;
-			document.getElementById("textOutputTab").innerHTML = tileTypes;
+			//document.getElementById("textOutputTab").innerHTML = tileTypes;
+
+			//------------------------- FIND TILES TYPES ----------------------------------
+
+			for(var i = 0; i < networkStructure; i++){
+				SetDepMatrix(i);
+			}
+			
+			SetRows(Hierarchical);
+
+			for(var i = 0; i < NumberMatrices; i++){
+				InitFiles(i);
+			}
 
 
 
@@ -220,6 +337,121 @@
 
 		}
 
+		//--------------------- SITE FUNCTIONS -------------------------------------------
+
+		function gameChanged(selectedValue){
+			choseGame = selectedValue;
+			if(selectedValue == "other"){
+				document.getElementById("defaultMaps").disabled = true;
+				document.getElementById("userYourOwnMapsRadio").checked = true;
+				document.getElementById("fileinput").disabled = false;
+			}else{
+				document.getElementById("defaultMaps").disabled = false;
+				
+			}
+		}
+
+		function changeToMRF(){
+			var rowSplits = document.getElementById("rowSplits"); 
+			var lookahead = document.getElementById("lookahead");
+			var numberOfClusters = document.getElementById("numberOfClusters");
+			var distanceMetric = document.getElementById("distanceMetric");
+			var tileSize = document.getElementById("tileSize");
+			var manualRadio = document.getElementById("manualRadio");
+			var parameters = document.getElementById("parameters");
+			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+
+			rowSplits.disabled = true;
+			lookahead.disabled = true;
+			numberOfClusters.disabled = true;
+			distanceMetric.disabled = true;
+			tileSize.disabled = true;
+			manualRadio.disabled = true;
+			parameters.disabled = true;
+			clusteringBasedRadio.disabled = true;
+			formHighLevelConvertion.disabled = true;
+
+			MdMC = false;
+			HMdMC = false;
+			MRF = true;
+
+		}
+
+		function changeToMdMC(){
+			var rowSplits = document.getElementById("rowSplits"); 
+			var lookahead = document.getElementById("lookahead");
+			var numberOfClusters = document.getElementById("numberOfClusters");
+			var distanceMetric = document.getElementById("distanceMetric");
+			var tileSize = document.getElementById("tileSize");
+			var manualRadio = document.getElementById("manualRadio");
+			var parameters = document.getElementById("parameters");
+			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+
+			rowSplits.disabled = false;
+			lookahead.disabled = false;
+			numberOfClusters.disabled = true;
+			distanceMetric.disabled = true;
+			tileSize.disabled = true;
+			manualRadio.disabled = true;
+			parameters.disabled = true;
+			clusteringBasedRadio.disabled = true;
+			formHighLevelConvertion.disabled = true;
+
+			MdMC = true;
+			HMdMC = false;
+			MRF = false;
+
+		}
+
+		function changeToHMdMC(){
+			var rowSplits = document.getElementById("rowSplits"); 
+			var lookahead = document.getElementById("lookahead");
+			var numberOfClusters = document.getElementById("numberOfClusters");
+			var distanceMetric = document.getElementById("distanceMetric");
+			var tileSize = document.getElementById("tileSize");
+			var manualRadio = document.getElementById("manualRadio");
+			var parameters = document.getElementById("parameters");
+			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+
+			rowSplits.disabled = false;
+			lookahead.disabled = false;
+			numberOfClusters.disabled = false;
+			distanceMetric.disabled = false;
+			tileSize.disabled = false;
+			manualRadio.disabled = false;
+			parameters.disabled = false;
+			clusteringBasedRadio.disabled = false;
+			formHighLevelConvertion.disabled = true;
+
+			manualRadio.checked = true;
+			clusteringBasedRadio.checked = false;
+
+			MdMC = false;
+			HMdMC = true;
+			MRF = false;
+
+		}
+
+		function changeHighLevelMapsConvertion(){
+			var manualRadio = document.getElementById("manualRadio");
+			var parameters = document.getElementById("parameters");
+			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+
+			if(parameters.disabled == true){
+				parameters.disabled = false;
+				formHighLevelConvertion.disabled = true;
+			}
+			else{
+				parameters.disabled = true;
+				formHighLevelConvertion.disabled = false;
+			}
+
+		}
+
 	</script>
 
 </script>
@@ -259,8 +491,8 @@
 					<fieldset class="scheduler-border" id="chooseAGame">
 						<legend class="scheduler-border">Choose a Game</legend>
 
-						<select class="form-control" id="formChooseAGame">
-							<option value="kidIcarus">Kid Icarus</option>
+						<select class="form-control" id="formChooseAGame" onchange="gameChanged(this.value)">
+							<option value="kidIcarus" >Kid Icarus</option>
 							<option value="lorerunner">Loderunner</option>
 							<option value="superMarioBros">Super Mario Bros</option>
 							<option value="other">Other</option>
@@ -272,7 +504,7 @@
 						<legend class="scheduler-border">Training Maps</legend>
 
 						<div class="radio" >
-							<label><input type="radio" name="optradio" value="default" checked onchange="changeTrainingMaps()">Use default training maps</label>
+							<label><input type="radio" name="optradio" value="default" checked onchange="changeTrainingMaps()" id = "defaultMaps">Use default training maps</label>
 						</div>
 						<div class="radio">
 							<label><input type="radio" name="optradio" value="userMaps" onchange="changeTrainingMaps()" id = "userYourOwnMapsRadio">Use your own maps</label>
