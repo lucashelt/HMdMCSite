@@ -33,7 +33,7 @@
 		var HMdMC = false;
 		var MRF = false;
 
-		var fileContent;
+		var fileContent = [];
 		var tileTypes = [];
 		var hierTileTypes = [];
 		var TopDown = false;
@@ -83,18 +83,75 @@
 		
 
 
-		function ResizeVectors(hier){
+		function ResizeVectors(){
 
 			Totals.length = NumberMatrices;
 			Probabilities.length = NumberMatrices;
-			if (hier){
+			if (Hierarchical){
 				HierTotals.length = NumberMatrices;
 				HierProbabilities.length = NumberMatrices;
 			}
 		}
 
 
-		function SetTotalsTopLevel(){
+		function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
+
+
+
+			var numTypes = -1;
+			var start = 0;
+			var tilesVec = [];
+
+			if(Hierarchical){
+				numTypes = hierTileTypes.length;
+				for(var i = 0; i < numTypes; i++){
+					tilesVec.push(hierTileTypes(i));
+				}
+			}else{
+				numtypes = tileTypes.length;
+				for(var i = 0; i < numTypes; i++){
+					tilesVec.push(tileTypes(i));
+				}
+			}
+
+			var TotalsFile = TotalMatrix[WhichDepMat][0].length * TotalMatrix[WhichDepMat][0][0].length;			
+
+			if(Totals[WhichDepMat] == null){
+				Totals[WhichDepMat] = [];
+				var T = 0;
+				var index = 0;
+				var i = 0;
+				var Tmp = [];
+				
+				while(i < TotalsFile){ // size of Total MATRIX
+					Tmp.push(T);
+					i++;
+					index++;
+					if(index == numtypes + 1){
+						index = 0;
+						Totals[WhichDepMat].push(Tmp);
+						Tmp = [];
+					}
+				}
+			}
+
+			var MapVec = [];
+			var TempVec = [];
+			var InputMapSize = fileContent[0].length; 
+			var line = "";
+			var m;
+
+			TempVec.length = InputMapSize;
+
+			for(m = 0; m < InputMapSize; m++){
+				TempVec[m] = fileContent[0][m];
+				
+			}
+
+			
+
+
+			//document.getElementById("textOutputTab").innerHTML = TempVec;
 
 
 		}
@@ -150,10 +207,10 @@
 				//document.getElementById("textOutputTab").innerHTML = TotalMatrix;
 			}
 
-			function SetRows(hier){
+			function SetRows(){
 				var types = 0;
 
-				if(hier == true){
+				if(Hierarchical == true){
 					types = hierTileTypes.length;
 				}else{
 					types = tileTypes.length;
@@ -169,7 +226,7 @@
 			//document.getElementById("textOutputTab").innerHTML = Rows;
 		}
 		
-		function SetDepMatrix(DepMatrix){
+	function SetDepMatrix(DepMatrix){
 
 			var TempDepMat = [[],[],[],[],[]];
 			for (var i = 0; i < 5; i++)
@@ -241,14 +298,14 @@ function samplesGenerated(){
 			//------------------------- FIND TILES TYPES ----------------------------------
 
 			
-			var strLength = fileContent.length;
+			var strLength = fileContent[0].length;
 			var c;
 
 			
 			if(Hierarchical == false){
 				for(var i = 0; i < strLength; i++){
-					c = fileContent[i];
-					if(tileTypes.indexOf(fileContent[i]) == -1 && c != '\n' && c != '\t' && c != '\r'){
+					c = fileContent[0][i];
+					if(tileTypes.indexOf(fileContent[0][i]) == -1 && c != '\n' && c != '\t' && c != '\r'){
 						tileTypes.push(fileContent[i]);
 					}
 				}
@@ -258,9 +315,9 @@ function samplesGenerated(){
 				}
 			}else{
 				for(var i = 0; i < strLength; i++){
-					c = fileContent[i];
-					if(hierTileTypes.indexOf(fileContent[i]) == -1 && c != '\n' && c != '\t' && c != '\r'){
-						hierTileTypes.push(fileContent[i]);
+					c = fileContent[0][i];
+					if(hierTileTypes.indexOf(fileContent[0][i]) == -1 && c != '\n' && c != '\t' && c != '\r'){
+						hierTileTypes.push(fileContent[0][i]);
 					}
 				}
 
@@ -271,21 +328,27 @@ function samplesGenerated(){
 			}
 			
 			
-			//document.getElementById("textOutputTab").innerHTML = fileContent;
+			//document.getElementById("textOutputTab").innerHTML = fileContent[0];
 			//document.getElementById("textOutputTab").innerHTML = tileTypes;
 
 			//------------------------- FIND TILES TYPES ----------------------------------
 
-			for(var i = 0; i < networkStructure; i++){
+			for(var i = networkStructure; i >= 0; i--){
 				SetDepMatrix(i);
 			}
 			
-			SetRows(Hierarchical);
+			SetRows();
+			ResizeVectors();	
+
 
 			for(var i = 0; i < NumberMatrices; i++){
 				InitFiles(i);
 			}
 
+			
+			for(var dep = 0; dep < NumberMatrices; dep++){
+			SetTotalsTopLevel(dep,1) //depth, trainingMaps
+			}
 
 
 			var saveText = document.getElementById("saveText");
@@ -314,7 +377,8 @@ function samplesGenerated(){
 			if(userYourOwnMapsRadio.checked == false){
 
 				jQuery.get('http://localhost/HMdMC/foo.txt', function(data) {
-					fileContent = data;
+					fileContent[0] = data;
+					document.getElementById("textOutputTab").innerHTML = fileContent[0];
 				});
 			}else{
 
@@ -323,17 +387,16 @@ function samplesGenerated(){
 					var reader = new FileReader();
 					reader.readAsText(file, "UTF-8");
 					reader.onload = function (evt) {
-						fileContent = evt.target.result;
+						fileContent[0] = evt.target.result;
 
 					}
 					reader.onerror = function (evt) {
-						fileContent = "Fail to Load File!"
+						fileContent[0] = "Fail to Load File!"
 					}
 
 				}
 
 			}
-
 
 		}
 
@@ -551,7 +614,7 @@ function samplesGenerated(){
 
 							<div class="input-group">
 								<span class="input-group-addon" >Row Splits&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
-								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "12">
+								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "1">
 							</div>
 							<br>
 							<div class="input-group">
