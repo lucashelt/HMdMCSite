@@ -53,7 +53,7 @@
 		var ProbMatrix = [];
 		var HierTotalMatrix = [];
 		var HierProbMatrix = [];
-		var NumberOfRowSplits = 1;
+		var NumberOfRowSplits;
 
 
 		function createNewParagraph(string) {
@@ -105,40 +105,128 @@
 
 		function SetProbsForOnlyLowLevel(WhichDepMat){
 
+			var P = 0;
+			var index = 0;
+			var Types = 0;
+			var i = 0;
 
-		}
 
+			if (Hierarchical){
+				Types = hierTileTypes.length;
+			}
+			else{ 
+				Types = tileTypes.length;
+			}
 
-		function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
+			var TotalsFile = ProbMatrix[WhichDepMat][0].length * ProbMatrix[WhichDepMat][0][0].length;
 
-			
-
-			var numTypes = -1;
-			var start = 0;
-			var tilesVec = [];
-
-			if(Hierarchical){
-				numTypes = hierTileTypes.length;
-				for(var i = 0; i < numTypes; i++){
-					tilesVec.push(hierTileTypes[i]);
-				}
-			}else{
-				numTypes = tileTypes.length;
-				for(var i = 0; i < numTypes; i++){
-					tilesVec.push(tileTypes[i]);
+			if (Hierarchical == false){
+				Probabilities[WhichDepMat] = [];
+				var Tmp = [];
+				while (i < TotalsFile * NumberOfRowSplits){
+					Tmp.push(P);
+					i++;
+					index++;
+					if (index == Types){
+						index = 0;
+						Probabilities[WhichDepMat].push(Tmp);
+						Tmp = [];
+					}
+				}  
+			}
+			else{
+				var Tmp = [];
+				HierProbabilities = [];
+				var TMP = [];
+				var innerIndex = 0;
+				var i = 0;
+				var TotalsFile = ProbMatrix[WhichDepMat][0].length * ProbMatrix[WhichDepMat][0][0].length;
+				while (i < TotalsFile * NumberOfRowSplits){
+					Tmp.push(P);
+					i++;
+					index++;
+					if (index == Types){
+						index = 0;
+						TMP.push(Tmp);
+						Tmp = [];
+						innerIndex++;
+						if (innerIndex == Rows[WhichDepMat]){
+							innerIndex = 0;
+							HierProbabilities[WhichDepMat].push(TMP);
+							TMP = [];
+						}
+					}
 				}
 			}
 
-			var TotalsFile = TotalMatrix[WhichDepMat][0].length * TotalMatrix[WhichDepMat][0][0].length;			
+			if(Hierarchical){ 
+				/*
+				// ------------ NEED TO FIX FOR HIERARCHICAL ------------------ VVVVVVVVVVVVVVVVVVVVVVVVVVVV ----------- XXXXX
+				for (var k = 0; k < hierTileTypes.length; k++){
+					for (var i = 0; i < Rows[WhichDepMat]; i++){
+						if (HierTotals[WhichDepMat][k][i][Types] == 0)
+                    HierTotals[WhichDepMat][k][i][Types]++;	//if total=0, add 1 to prevent division by 0
+                for (var j = 0; j < Types; j++){
+                	HierProbabilities[WhichDepMat][k][i][j] = HierTotals[WhichDepMat][k][i][j] / HierTotals[WhichDepMat][k][i][Types];   
+                }              
+            }
+        }
+*/
+    }else{
 
-			if(Totals[WhichDepMat] == null){
-				Totals[WhichDepMat] = [];
-				var T = 0;
-				var index = 0;
-				var i = 0;
-				var Tmp = [];
-				
-				while(i < TotalsFile){ // size of Total MATRIX
+
+    	for (var i = 0; i < Totals[WhichDepMat].length; i++){
+    		for (var j = 0; j < Totals[WhichDepMat][0].length - 1; j++){
+                //if there is a 0 in the totals column, replace it with a one to avoid div. by 0
+                if (Totals[WhichDepMat][i][Types] == 0){
+                	Totals[WhichDepMat][i][Types]++;
+                }
+                
+                Probabilities[WhichDepMat][i][j] = Totals[WhichDepMat][i][j] / Totals[WhichDepMat][i][Types];
+            }
+        }
+    }
+
+    /*
+    for(var i = 0; i < Probabilities[WhichDepMat].length; i++){ // SHOW PROPABILITIES MATRICES IN THE TEXT OUTPUT
+    createNewParagraph(Probabilities[WhichDepMat][i]);
+	}
+	createNewParagraph("-----------------------------------------------");
+	*/
+}
+
+
+
+function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
+
+
+
+	var numTypes = -1;
+	var start = 0;
+	var tilesVec = [];
+
+	if(Hierarchical){
+		numTypes = hierTileTypes.length;
+		for(var i = 0; i < numTypes; i++){
+			tilesVec.push(hierTileTypes[i]);
+		}
+	}else{
+		numTypes = tileTypes.length;
+		for(var i = 0; i < numTypes; i++){
+			tilesVec.push(tileTypes[i]);
+		}
+	}
+
+	var TotalsFile = TotalMatrix[WhichDepMat][0].length * TotalMatrix[WhichDepMat][0][0].length;			
+
+	if(Totals[WhichDepMat] == null){
+		Totals[WhichDepMat] = [];
+		var T = 0;
+		var index = 0;
+		var i = 0;
+		var Tmp = [];
+
+				while(i < TotalsFile * NumberOfRowSplits){ // size of Total MATRIX
 					Tmp.push(T);
 					i++;
 					index++;
@@ -177,25 +265,28 @@
 						TempVec[indexTemp] = char;
 						indexTemp++;
 					}
-			}
+				}
 
-			var ID;
-			var P;
-			var id;
-			var rowsPerSplit = MapVec[maps].length / NumberOfRowSplits;
-			
-			
-			if(rowsPerSplit == 0){
-				rowsPerSplit =1;
-			}
+				var ID;
+				var P;
+				var id;
+				var rowsPerSplit = Math.floor(MapVec[maps].length / NumberOfRowSplits);
 
-			
-			for (var h = MapVec[maps].length - 1; h >= 0; h--){
+
+				if(rowsPerSplit == 0){
+					rowsPerSplit =1;
+				}
+
+
+				for (var h = MapVec[maps].length - 1; h >= 0; h--){
+				//alert(Math.floor(h/(Math.floor(MapVec[maps].length / 5))))
 
 				var currRow = Math.floor(h/rowsPerSplit);
+				
 				if(currRow >= NumberOfRowSplits)
 					currRow = NumberOfRowSplits - 1;
-
+				
+				
 				
 				for (var w = 0; w < MapVec[maps][h].length; w++){
 
@@ -250,19 +341,19 @@
 					Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][id]++;
 					Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][numTypes]++;
 
-					
-				}
 
+				}
+				
 			}
 
 		}
-			
-			for(var i = 0; i < Totals[WhichDepMat].length; i++){  //SHOW TOTALS MATRICES
+			/*
+			for(var i = 0; i < Totals[WhichDepMat].length; i++){  //SHOW TOTALS MATRICES IN TEXT OUTPUT
 			createNewParagraph(Totals[WhichDepMat][i])
 			}
 			
 			createNewParagraph("---------------------------------------------------------");
-			
+			*/
 
 		}
 
