@@ -5,6 +5,8 @@
   background-color:red;
 }
 
+p { margin:0 }
+
 body { 
 position:absolute; 
 top:0; 
@@ -189,10 +191,11 @@ height: 40px;
 }
 
 #textOutputTab{
+font-family: "Courier New", Courier, monospace;
 	margin-top:32px;
 	margin-left:40px;
 height: 480px;
-	width: 1222px;
+	width: 2222px;
 	float: left;
 	border:1px;
 border-style:solid;

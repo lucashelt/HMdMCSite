@@ -55,6 +55,15 @@
 		var HierProbMatrix = [];
 		var NumberOfRowSplits = 1;
 
+
+		function createNewParagraph(string) {
+			var text = string;
+			var newParagraph = document.createElement('p');
+			newParagraph.textContent = text;
+			document.getElementById("textOutputTab").appendChild(newParagraph);
+		}
+
+
 		function changeTrainingMaps() {
 			var x = document.getElementById("fileinput");
 			if(x.disabled == true){
@@ -96,7 +105,7 @@
 
 		function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
-
+			
 
 			var numTypes = -1;
 			var start = 0;
@@ -105,12 +114,12 @@
 			if(Hierarchical){
 				numTypes = hierTileTypes.length;
 				for(var i = 0; i < numTypes; i++){
-					tilesVec.push(hierTileTypes(i));
+					tilesVec.push(hierTileTypes[i]);
 				}
 			}else{
-				numtypes = tileTypes.length;
+				numTypes = tileTypes.length;
 				for(var i = 0; i < numTypes; i++){
-					tilesVec.push(tileTypes(i));
+					tilesVec.push(tileTypes[i]);
 				}
 			}
 
@@ -127,7 +136,7 @@
 					Tmp.push(T);
 					i++;
 					index++;
-					if(index == numtypes + 1){
+					if(index == numTypes + 1){
 						index = 0;
 						Totals[WhichDepMat].push(Tmp);
 						Tmp = [];
@@ -135,24 +144,126 @@
 				}
 			}
 
+
+
 			var MapVec = [];
 			var TempVec = [];
 			var InputMapSize = fileContent[0].length; 
 			var line = "";
 			var m;
+			var aux = '';
+			var indexTemp = 0;
 
-			TempVec.length = InputMapSize;
 
 			for(m = 0; m < InputMapSize; m++){
-				TempVec[m] = fileContent[0][m];
+				var char = fileContent[0][m];
 				
+
+				if(char == '\n' || char == '\r' || char == '\t'){
+					MapVec.push(TempVec);
+					indexTemp = 0;
+					TempVec = [];
+
+				}else{
+					TempVec[indexTemp] = char;
+					indexTemp++;
+				}
+
+
+
+				/* TEST Maps ... show it in the output div **** USE IT LATER TO SHOW THE FINAL MAPS -- REMOVE OR CHANGE OLD VERSION
+				aux += fileContent[0][m];
+			
+				if(WhichDepMat == 0 && fileContent[0][m] == '\n'){
+					createNewParagraph(aux);
+					aux = '';
+				}
+				*/
+			}
+
+			var ID;
+			var P;
+			var id;
+			var rowsPerSplit = MapVec.length / NumberOfRowSplits;
+			
+			
+			if(rowsPerSplit == 0){
+				rowsPerSplit =1;
 			}
 
 			
+			for (var h = MapVec.length - 1; h >= 0; h--){
+
+				var currRow = Math.floor(h/rowsPerSplit);
+				if(currRow >= NumberOfRowSplits)
+					currRow = NumberOfRowSplits - 1;
+
+				
+				for (var w = 0; w < MapVec[h].length; w++){
 
 
-			//document.getElementById("textOutputTab").innerHTML = TempVec;
+					ID = 0;
+					id = -1;
+					P = 0;
+					
+					
+					for (var i = 0; i < DependencyMatrices[WhichDepMat].length; i++){
+						for (var j =0; j < DependencyMatrices[WhichDepMat][i].length; j++){
 
+
+							if (DependencyMatrices[WhichDepMat][i][j] == 1){
+								
+
+								if (((h + i - 2) < 0) ||  ((h + i - 2) >= MapVec.length)  || ((w + j - 2) < 0)){
+
+									id=start;
+
+								}else{
+
+									for(var m = 0; m < numTypes; m++){
+
+										if(tilesVec[m] == MapVec[h + i - 2][w + j - 2]){
+
+											id = m;
+											break;
+										}
+									}
+
+									ID += id * Math.pow(numTypes, P);
+									P++;
+
+
+								}
+							}							
+						}
+					}
+					
+					
+					for (var m = 0; m < numTypes; m++){
+						if (tilesVec[m] == MapVec[h][w]){
+							
+							id = m;
+							break;
+						}
+					}
+					
+					
+					//createNewParagraph(ID);
+					Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][id]++;
+					Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][numTypes]++;
+
+					
+				}
+
+			}
+
+			/* 
+			for(var i = 0; i < Totals[WhichDepMat].length; i++){  //SHOW TOTALS MATRICES
+			createNewParagraph(Totals[WhichDepMat][i])
+		}
+			
+			createNewParagraph("---------------------------------------------------------");
+			*/
 
 		}
 
@@ -226,7 +337,7 @@
 			//document.getElementById("textOutputTab").innerHTML = Rows;
 		}
 		
-	function SetDepMatrix(DepMatrix){
+		function SetDepMatrix(DepMatrix){
 
 			var TempDepMat = [[],[],[],[],[]];
 			for (var i = 0; i < 5; i++)
@@ -303,29 +414,35 @@ function samplesGenerated(){
 
 			
 			if(Hierarchical == false){
-				for(var i = 0; i < strLength; i++){
-					c = fileContent[0][i];
-					if(tileTypes.indexOf(fileContent[0][i]) == -1 && c != '\n' && c != '\t' && c != '\r'){
-						tileTypes.push(fileContent[i]);
-					}
-				}
-
 				if(tileTypes.indexOf('S') == -1){
 					tileTypes.push('S');	
 				}
-			}else{
+
 				for(var i = 0; i < strLength; i++){
 					c = fileContent[0][i];
-					if(hierTileTypes.indexOf(fileContent[0][i]) == -1 && c != '\n' && c != '\t' && c != '\r'){
-						hierTileTypes.push(fileContent[0][i]);
+					if(tileTypes.indexOf(c) == -1 && c != '\n' && c != '\t' && c != '\r'){
+						tileTypes.push(c);
 					}
 				}
 
+				
+			}else{
 				if(hierTileTypes.indexOf('S') == -1){
 					hierTileTypes.push('S');	
 				}
 
+				for(var i = 0; i < strLength; i++){
+					c = fileContent[0][i];
+					if(hierTileTypes.indexOf(c) == -1 && c != '\n' && c != '\t' && c != '\r'){
+						hierTileTypes.push(c);
+					}
+				}
+
+				
+
 			}
+
+
 			
 			
 			//document.getElementById("textOutputTab").innerHTML = fileContent[0];
@@ -348,41 +465,41 @@ function samplesGenerated(){
 			
 			for(var dep = 0; dep < NumberMatrices; dep++){
 			SetTotalsTopLevel(dep,1) //depth, trainingMaps
-			}
-
-
-			var saveText = document.getElementById("saveText");
-			var saveGraphic = document.getElementById("saveGraphic");
-
-			saveText.disabled = false;
-			saveGraphic.disabled = false;
-
 		}
 
 
-		function MdMCExperiments(){
+		var saveText = document.getElementById("saveText");
+		var saveGraphic = document.getElementById("saveGraphic");
 
-			var trainingFolderNameValue = document.getElementById("fileinput").value;
-			var rowSplitsValue = document.getElementById("rowSplits").value;
-			var lookaheadValue = document.getElementById("lookahead").value; 
-			var networkStructureValue = "2"; 
-			var trainingMapsValue = "10"; 
-			var toGenerateValue = "100"; 
-			var heightValue = document.getElementById("height").value; 
-			var widthValue = document.getElementById("width").value;
-			var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
+		saveText.disabled = false;
+		saveGraphic.disabled = false;
+
+	}
 
 
+	function MdMCExperiments(){
 
-			if(userYourOwnMapsRadio.checked == false){
+		var trainingFolderNameValue = document.getElementById("fileinput").value;
+		var rowSplitsValue = document.getElementById("rowSplits").value;
+		var lookaheadValue = document.getElementById("lookahead").value; 
+		var networkStructureValue = "2"; 
+		var trainingMapsValue = "10"; 
+		var toGenerateValue = "100"; 
+		var heightValue = document.getElementById("height").value; 
+		var widthValue = document.getElementById("width").value;
+		var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
 
-				jQuery.get('http://localhost/HMdMC/foo.txt', function(data) {
-					fileContent[0] = data;
-					document.getElementById("textOutputTab").innerHTML = fileContent[0];
+
+
+		if(userYourOwnMapsRadio.checked == false){
+
+			jQuery.get('http://localhost/HMdMC/foo.txt', function(data) {
+				fileContent[0] = data;
+					//document.getElementById("textOutputTab").innerHTML = fileContent[0];
 				});
-			}else{
+		}else{
 
-				var file = document.getElementById("fileinput").files[0];
+				//var file = document.getElementById("fileinput").files[0];
 				if (file) {
 					var reader = new FileReader();
 					reader.readAsText(file, "UTF-8");
