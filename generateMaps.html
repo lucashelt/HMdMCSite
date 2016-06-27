@@ -103,6 +103,8 @@
 		}
 
 
+
+
 		function SetProbsForOnlyLowLevel(WhichDepMat){
 
 			var P = 0;
@@ -160,7 +162,7 @@
 			}
 
 			if(Hierarchical){ 
-				/*
+
 				// ------------ NEED TO FIX FOR HIERARCHICAL ------------------ VVVVVVVVVVVVVVVVVVVVVVVVVVVV ----------- XXXXX
 				for (var k = 0; k < hierTileTypes.length; k++){
 					for (var i = 0; i < Rows[WhichDepMat]; i++){
@@ -171,7 +173,7 @@
                 }              
             }
         }
-*/
+
     }else{
 
 
@@ -187,12 +189,12 @@
         }
     }
 
-    /*
+    
     for(var i = 0; i < Probabilities[WhichDepMat].length; i++){ // SHOW PROPABILITIES MATRICES IN THE TEXT OUTPUT
-    createNewParagraph(Probabilities[WhichDepMat][i]);
-	}
-	createNewParagraph("-----------------------------------------------");
-	*/
+    	createNewParagraph(Probabilities[WhichDepMat][i]);
+    }
+    createNewParagraph("-----------------------------------------------");
+    
 }
 
 
@@ -251,13 +253,14 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
 			for(var maps = 0; maps < numberOfTrainingMaps; maps++){
 				InputMapSize = fileContent[maps].length;
-				MapVec.push([]);
+				MapVec.push([]); // Vetor inteiro
+				
 				for(m = 0; m < InputMapSize; m++){
 					var char = fileContent[maps][m];
 
 
 					if(char == '\n' || char == '\r' || char == '\t'){
-						MapVec[maps].push(TempVec);
+						MapVec[0].push(TempVec); //parte de vetores
 						indexTemp = 0;
 						TempVec = [];
 
@@ -270,7 +273,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 				var ID;
 				var P;
 				var id;
-				var rowsPerSplit = Math.floor(MapVec[maps].length / NumberOfRowSplits);
+				var rowsPerSplit = Math.floor(MapVec[0].length / NumberOfRowSplits);
 
 
 				if(rowsPerSplit == 0){
@@ -278,7 +281,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 				}
 
 
-				for (var h = MapVec[maps].length - 1; h >= 0; h--){
+				for (var h = MapVec[0].length - 1; h >= 0; h--){
 				//alert(Math.floor(h/(Math.floor(MapVec[maps].length / 5))))
 
 				var currRow = Math.floor(h/rowsPerSplit);
@@ -288,7 +291,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 				
 				
 				
-				for (var w = 0; w < MapVec[maps][h].length; w++){
+				for (var w = 0; w < MapVec[0][h].length; w++){
 
 
 					ID = 0;
@@ -303,7 +306,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 							if (DependencyMatrices[WhichDepMat][i][j] == 1){
 								
 
-								if (((h + i - 2) < 0) ||  ((h + i - 2) >= MapVec[maps].length)  || ((w + j - 2) < 0)){
+								if (((h + i - 2) < 0) ||  ((h + i - 2) >= MapVec[0].length)  || ((w + j - 2) < 0)){
 
 									id=start;
 
@@ -311,7 +314,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
 									for(var m = 0; m < numTypes; m++){
 
-										if(tilesVec[m] == MapVec[maps][h + i - 2][w + j - 2]){
+										if(tilesVec[m] == MapVec[0][h + i - 2][w + j - 2]){
 
 											id = m;
 											break;
@@ -329,7 +332,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 					
 					
 					for (var m = 0; m < numTypes; m++){
-						if (tilesVec[m] == MapVec[maps][h][w]){
+						if (tilesVec[m] == MapVec[0][h][w]){
 							
 							id = m;
 							break;
@@ -345,8 +348,9 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 				}
 				
 			}
-
+			
 		}
+
 			/*
 			for(var i = 0; i < Totals[WhichDepMat].length; i++){  //SHOW TOTALS MATRICES IN TEXT OUTPUT
 			createNewParagraph(Totals[WhichDepMat][i])
@@ -481,10 +485,47 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
 }
 
+function FindTilesTypes(fileNumber){
+	var strLength = fileContent[fileNumber].length;
+	var c;
 
+	
+	if(Hierarchical == false){
+		if(tileTypes.indexOf('S') == -1){
+			tileTypes.push('S');	
+		}
 
-function samplesGenerated(){
+		for(var i = 0; i < strLength; i++){
+			c = fileContent[fileNumber][i];
+			if(tileTypes.indexOf(c) == -1 && c != '\n' && c != '\t' && c != '\r'){
+				tileTypes.push(c);
+			}
+		}
 
+		
+	}else{
+		if(hierTileTypes.indexOf('S') == -1){
+			hierTileTypes.push('S');	
+		}
+
+		for(var i = 0; i < strLength; i++){
+			c = fileContent[fileNumber][i];
+			if(hierTileTypes.indexOf(c) == -1 && c != '\n' && c != '\t' && c != '\r'){
+				hierTileTypes.push(c);
+			}
+		}
+
+		
+
+	}
+
+			//document.getElementById("textOutputTab").innerHTML = fileContent[0];
+			//document.getElementById("textOutputTab").innerHTML = tileTypes;
+		}
+
+		function samplesGenerated(){
+
+			
 			//alert(fileContent);
 			//tileTypes.indexOf("a");
 
@@ -495,50 +536,9 @@ function samplesGenerated(){
 
 			NumberOfRowSplits = document.getElementById("rowSplits").value;
 
-
-			//------------------------- FIND TILES TYPES ----------------------------------
-
-			
-			var strLength = fileContent[0].length;
-			var c;
-
-			
-			if(Hierarchical == false){
-				if(tileTypes.indexOf('S') == -1){
-					tileTypes.push('S');	
-				}
-
-				for(var i = 0; i < strLength; i++){
-					c = fileContent[0][i];
-					if(tileTypes.indexOf(c) == -1 && c != '\n' && c != '\t' && c != '\r'){
-						tileTypes.push(c);
-					}
-				}
-
-				
-			}else{
-				if(hierTileTypes.indexOf('S') == -1){
-					hierTileTypes.push('S');	
-				}
-
-				for(var i = 0; i < strLength; i++){
-					c = fileContent[0][i];
-					if(hierTileTypes.indexOf(c) == -1 && c != '\n' && c != '\t' && c != '\r'){
-						hierTileTypes.push(c);
-					}
-				}
-
-				
-
+			for(var i = 0; i < fileContent.length; i++){
+				FindTilesTypes(i);
 			}
-
-
-			
-			
-			//document.getElementById("textOutputTab").innerHTML = fileContent[0];
-			//document.getElementById("textOutputTab").innerHTML = tileTypes;
-
-			//------------------------- FIND TILES TYPES ----------------------------------
 
 			for(var i = networkStructure; i >= 0; i--){
 				SetDepMatrix(i);
@@ -554,44 +554,66 @@ function samplesGenerated(){
 
 			
 			for(var dep = 0; dep < NumberMatrices; dep++){
-			SetTotalsTopLevel(dep,1) //depth, trainingMaps
+				SetTotalsTopLevel(dep,fileContent.length) //depth, trainingMaps
+			}
+
+			for(var dep = 0; dep < NumberMatrices; dep++){
+				SetProbsForOnlyLowLevel(dep) //depth
+			}
+
+
+			var saveText = document.getElementById("saveText");
+			var saveGraphic = document.getElementById("saveGraphic");
+
+			saveText.disabled = false;
+			saveGraphic.disabled = false;
+
+
+
 		}
 
-		for(var dep = 0; dep < NumberMatrices; dep++){
-			SetProbsForOnlyLowLevel(dep) //depth
-		}
 
+		function MdMCExperiments(){
 
-		var saveText = document.getElementById("saveText");
-		var saveGraphic = document.getElementById("saveGraphic");
+			var trainingFolderNameValue = document.getElementById("fileinput").value;
+			var rowSplitsValue = document.getElementById("rowSplits").value;
+			var lookaheadValue = document.getElementById("lookahead").value; 
+			var networkStructureValue = "2"; 
+			var trainingMapsValue = "10"; 
+			var toGenerateValue = "100"; 
+			var heightValue = document.getElementById("height").value; 
+			var widthValue = document.getElementById("width").value;
+			var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
 
-		saveText.disabled = false;
-		saveGraphic.disabled = false;
+			fileContent = [];
 
-	}
+			if(userYourOwnMapsRadio.checked == false){
 
-
-	function MdMCExperiments(){
-
-		var trainingFolderNameValue = document.getElementById("fileinput").value;
-		var rowSplitsValue = document.getElementById("rowSplits").value;
-		var lookaheadValue = document.getElementById("lookahead").value; 
-		var networkStructureValue = "2"; 
-		var trainingMapsValue = "10"; 
-		var toGenerateValue = "100"; 
-		var heightValue = document.getElementById("height").value; 
-		var widthValue = document.getElementById("width").value;
-		var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
-
-
-
-		if(userYourOwnMapsRadio.checked == false){
-
-			jQuery.get('http://localhost/HMdMC/foo.txt', function(data) {
-				fileContent[0] = data;
-					//document.getElementById("textOutputTab").innerHTML = fileContent[0];
+				jQuery.get('http://localhost/HMdMC/mario_1.txt', function(data) {
+					fileContent.push(data);
+					
+					/*Show MAP
+					var aux = "";
+					for(var i = 0; i < fileContent[0].length; i++){
+						aux += fileContent[0][i];
+						if(fileContent[0][i] == '\n'){
+							createNewParagraph(aux);
+							aux = "";
+						}
+					}
+					*/
 				});
-		}else{
+
+/*SECOND MAP
+			jQuery.get('http://localhost/HMdMC/mario_2.txt', function(data) {
+				fileContent.push(data);
+					
+				});
+				*/
+				
+				//CAPTAR LETRAS
+
+			}else{
 
 				//var file = document.getElementById("fileinput").files[0];
 				if (file) {
@@ -608,7 +630,6 @@ function samplesGenerated(){
 				}
 
 			}
-
 		}
 
 		//--------------------- SITE FUNCTIONS -------------------------------------------
