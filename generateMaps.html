@@ -55,113 +55,325 @@
 		var HierProbMatrix = [];
 		var NumberOfRowSplits;
 
+		var MapGen = [];
+		var lookahead;
 
-		function createNewParagraph(string) {
-			var text = string;
-			var newParagraph = document.createElement('p');
-			newParagraph.textContent = text;
-			document.getElementById("textOutputTab").appendChild(newParagraph);
-		}
+		var mapHeight;
+		var mapWidth;
 
+		var BackTracks;
+		var badPipes;
+		var NumberTilesWithEachMatrix = [];
+		var start = 0;
 
-		function changeTrainingMaps() {
-			var x = document.getElementById("fileinput");
-			if(x.disabled == true){
-				x.disabled = false;
-			}else{
-				x.disabled = true;
-			}
+		function GenerateTopLevelTile(PossibleTiles, h, w, offset, WhichDepMat, depth){
 
-		}
+			
 
-		function samplingReady(){
-			var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
-			tileTypes = [];
+			//PT.splice(2,1); remover from array
 
-			var file = document.getElementById("fileinput").files[0];
-			if(file && userYourOwnMapsRadio.checked == true || userYourOwnMapsRadio.checked == false){
-				var samplingMapsButton = document.getElementById("samplingMapsButton");
-				samplingMapsButton.disabled = false;
-				MdMCExperiments();
-			}
-			else{
-				alert("Please choose Training Maps!");
-			}
-		}
+			var id = -1;
+			var selector;
+			
+			var type = start;
+			var PT = PossibleTiles;
+			var Probs;
 
-		
+			
+			while (PT.length > 0){
 
+				var ID = 0;
+				var P = 0;
 
-		function ResizeVectors(){
-
-			Totals.length = NumberMatrices;
-			Probabilities.length = NumberMatrices;
-			if (Hierarchical){
-				HierTotals.length = NumberMatrices;
-				HierProbabilities.length = NumberMatrices;
-			}
-		}
-
-
-
-
-		function SetProbsForOnlyLowLevel(WhichDepMat){
-
-			var P = 0;
-			var index = 0;
-			var Types = 0;
-			var i = 0;
-
-
-			if (Hierarchical){
-				Types = hierTileTypes.length;
-			}
-			else{ 
-				Types = tileTypes.length;
-			}
-
-			var TotalsFile = ProbMatrix[WhichDepMat][0].length * ProbMatrix[WhichDepMat][0][0].length;
-
-			if (Hierarchical == false){
-				Probabilities[WhichDepMat] = [];
-				var Tmp = [];
-				while (i < TotalsFile * NumberOfRowSplits){
-					Tmp.push(P);
-					i++;
-					index++;
-					if (index == Types){
-						index = 0;
-						Probabilities[WhichDepMat].push(Tmp);
-						Tmp = [];
-					}
-				}  
-			}
-			else{
-				var Tmp = [];
-				HierProbabilities = [];
-				var TMP = [];
-				var innerIndex = 0;
-				var i = 0;
-				var TotalsFile = ProbMatrix[WhichDepMat][0].length * ProbMatrix[WhichDepMat][0][0].length;
-				while (i < TotalsFile * NumberOfRowSplits){
-					Tmp.push(P);
-					i++;
-					index++;
-					if (index == Types){
-						index = 0;
-						TMP.push(Tmp);
-						Tmp = [];
-						innerIndex++;
-						if (innerIndex == Rows[WhichDepMat]){
-							innerIndex = 0;
-							HierProbabilities[WhichDepMat].push(TMP);
-							TMP = [];
+				//check if this state has been observed before
+				for (var k = 0; k < 5; k++){
+					for (var m = 2; m >= 0; m--){
+						if (DependencyMatrices[0][k][m] == 1){
+							if (((h + (k - 2)) < 0) || ((h + (k - 2)) >= mapHeight) || ((w + (m - 2)) < 0))
+								type = start;
+							else{
+								for (var b = 0; b < tileTypes.length; b++){
+									if (MapGen[h + (k - 2)][w + (m - 2)] == tileTypes[b]){
+										type = b;
+									}
+								}
+							}
+							ID += type * Math.pow(tileTypes.length, P);
+							P++;
 						}
+					}
+				}
+
+				var Obs = false;
+		//check if the state has been observed before
+		for (var a = 0; a < PT.length; a++){
+			for (var x = 0; x < tileTypes.length; x++){
+				if (PT[a] == tileTypes[x]){
+					if (Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x] != 0){
+						Obs = true;
+						x = tileTypes.length;
+						a = PT.length;
+					}
+				}
+			}
+		}
+
+		if (Obs != true && depth != lookahead){		//if this state hasnt been observed and this is NOT the top level in the lookahead
+			BackTracks++;				//then return an error
+			return 99;
+		}
+		else if (Obs != true && depth == lookahead){	//if we havent observed this state, and it IS the first step, then break out of
+			break;								//of the loop, where we will return a random tile
+		}
+		else if (Obs == true){				//if we have observed this state, then generate the next tile
+
+
+			var Norm = 0;
+			Probs = [];
+			Probs.length = PT.length;
+
+			for (var i = 0; i < PT.length; i++){	//reset the value of Probs
+				Probs[i] = 0;
+			}
+
+			
+			
+
+
+			for (var a = 0; a < PT.length; a++){
+				for (var x = 0; x < tileTypes.length; x++){
+					if (PT[a] == tileTypes[x]){
+						Probs[a] = Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x];
+						Norm += Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x];
+						
 					}
 				}
 			}
 
-			if(Hierarchical){ 
+
+
+			for (var i = 0; i < PT.length; i++){						//renormalize the probabilities
+				Probs[i] = Probs[i] / Norm;
+			}
+
+
+
+			//PICK THE TILE
+			var PR = 0;
+			var tracker = 0;
+			selector = Math.random();  //2147483647  = RAND_MAX
+			//createNewParagraph(selector.toFixed(10));
+			for (var a = 0; a < PT.length; a++){
+				PR = PR + Probs[a];
+
+				if (Probs[a] > 0){
+					tracker = a;
+				}
+				if (selector <= PR){
+
+					id = a;
+					break;
+				}
+				//if weirdness happens with the probabilities
+				//BROKEN
+                //if (a >= PT.size() - 1 && id == -1)
+				//	id = tracker;
+			}
+			
+			if (h < MapGen.length && w < MapGen[0].length){
+				MapGen[h][w] = PT[id];
+			}
+
+			//call the GenTile function to generate the next tile
+			//set to a test variable, so we can check the validity
+			//of the next state
+			var test = 1;
+
+			
+
+			if (depth > 0){
+
+				if (w < mapWidth-1){
+					test = GenerateTopLevelTile(tileTypes, h, w+1, offset, WhichDepMat, depth - 1);
+					
+				}
+			}
+
+            //if the next state isnt valid, remove the tile chosen in this state and try a different one
+            if (test == 99){
+
+            	var j = 0;
+            	if (id < PT.length){
+            		for (var i = 0; i < PT.length; i++){
+
+            			if (PT[j] == PT[id]){
+            				PT.splice(i,1);
+            				break;
+            			}
+            			j++;
+            		}
+
+            	}
+            	else
+            		PT = [];
+            }
+            else{
+            	for (var i = 0; i < tileTypes.length; i++){
+            		if (PT[id] == tileTypes[i])
+
+            			return i;
+
+            	}
+            }
+
+        }	
+    }	
+			if (depth == lookahead){				//if no valid options on top level, return error code 100
+				return 100;
+			}
+			else{
+				BackTracks++;
+		return 99;				//if no valid options on sub level, return error.
+	}
+}
+
+function GenerateTopLevel(){
+
+
+	for (var i = 0; i < NumberMatrices; i++){
+        NumberTilesWithEachMatrix.push(0);
+    }
+
+	var PossibleTiles = [];
+	PossibleTiles.length = tileTypes.length;
+
+
+	for(var i = 1; i < tileTypes.length; i++){
+		PossibleTiles[i] = tileTypes[i];
+	}
+
+	MapGen.length = mapHeight;
+
+	for (var i = 0; i < mapHeight; i++){
+		MapGen[i] = [];
+		MapGen[i].length = mapWidth;
+		for (var j = 0; j < mapWidth; j++){
+			MapGen[i][j] = 'X';
+		} 
+	}
+
+	var rowsPerSplit = Math.floor(MapGen.length / NumberOfRowSplits);
+	for(var h = MapGen.length - 1; h >= 0; h--){
+		var currRow = Math.floor(h/rowsPerSplit);
+		if(currRow >= NumberOfRowSplits){
+			currRow = NumberOfRowSplits - 1;
+		}
+		for(var j = 0; j < MapGen[h].length; j++){
+			var id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, 0, lookahead); // CORRETO ATE AQUI
+			
+			//if it fails, and we are using a fallback strategy, try to generate with the second config matrix
+            //if a good tile is generated with first method, track it
+            if (id != 100){
+                NumberTilesWithEachMatrix[0]++;
+            }
+
+            var WhichDepMat = 1;
+            while (id == 100 && WhichDepMat < NumberMatrices){
+
+                id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, WhichDepMat, lookahead);
+                //track how many tiles generated with fallback method
+                if (id != 100){
+                    NumberTilesWithEachMatrix[WhichDepMat]++;
+                    break;
+                }
+                else
+                    WhichDepMat++;
+            }
+
+            //if it also fails, or we are not using a fallback strategy, generate a tile at random
+            if (id == 100){
+                //ignore one of the tiles
+                while (id == 100 || (tileTypes == start)){
+                    id = (Math.random() % (tileTypes.length - 1)) + 1;
+                }
+            }
+            MapGen[h][j] = tileTypes[id];
+
+		}
+	}
+
+	var aux = "";
+	for(var i = 0; i < MapGen.length; i++){
+		for(var j = 0; j < MapGen[i].length;j++){
+			aux += MapGen[i][j];
+			if(j == MapGen[i].length- 1){
+				createNewParagraph(aux);
+				aux = "";
+			}
+		}
+	}
+	
+
+
+}
+
+function SetProbsForOnlyLowLevel(WhichDepMat){
+
+	var P = 0;
+	var index = 0;
+	var Types = 0;
+	var i = 0;
+
+
+	if (Hierarchical){
+		Types = hierTileTypes.length;
+	}
+	else{ 
+		Types = tileTypes.length;
+	}
+
+	var TotalsFile = ProbMatrix[WhichDepMat][0].length * ProbMatrix[WhichDepMat][0][0].length;
+
+	if (Hierarchical == false){
+		Probabilities[WhichDepMat] = [];
+		var Tmp = [];
+		while (i < TotalsFile * NumberOfRowSplits){
+			Tmp.push(P);
+			i++;
+			index++;
+			if (index == Types){
+				index = 0;
+				Probabilities[WhichDepMat].push(Tmp);
+				Tmp = [];
+			}
+		}  
+	}
+	else{
+		var Tmp = [];
+		HierProbabilities = [];
+		var TMP = [];
+		var innerIndex = 0;
+		var i = 0;
+		var TotalsFile = ProbMatrix[WhichDepMat][0].length * ProbMatrix[WhichDepMat][0][0].length;
+		while (i < TotalsFile * NumberOfRowSplits){
+			Tmp.push(P);
+			i++;
+			index++;
+			if (index == Types){
+				index = 0;
+				TMP.push(Tmp);
+				Tmp = [];
+				innerIndex++;
+				if (innerIndex == Rows[WhichDepMat]){
+					innerIndex = 0;
+					HierProbabilities[WhichDepMat].push(TMP);
+					TMP = [];
+				}
+			}
+		}
+	}
+
+	if(Hierarchical){ 
 
 				// ------------ NEED TO FIX FOR HIERARCHICAL ------------------ VVVVVVVVVVVVVVVVVVVVVVVVVVVV ----------- XXXXX
 				for (var k = 0; k < hierTileTypes.length; k++){
@@ -189,12 +401,12 @@
         }
     }
 
-    
+    /*
     for(var i = 0; i < Probabilities[WhichDepMat].length; i++){ // SHOW PROPABILITIES MATRICES IN THE TEXT OUTPUT
     	createNewParagraph(Probabilities[WhichDepMat][i]);
     }
     createNewParagraph("-----------------------------------------------");
-    
+    */
 }
 
 
@@ -348,7 +560,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 				}
 				
 			}
-			
+
 		}
 
 			/*
@@ -489,7 +701,7 @@ function FindTilesTypes(fileNumber){
 	var strLength = fileContent[fileNumber].length;
 	var c;
 
-	
+
 	if(Hierarchical == false){
 		if(tileTypes.indexOf('S') == -1){
 			tileTypes.push('S');	
@@ -502,7 +714,7 @@ function FindTilesTypes(fileNumber){
 			}
 		}
 
-		
+
 	}else{
 		if(hierTileTypes.indexOf('S') == -1){
 			hierTileTypes.push('S');	
@@ -515,7 +727,7 @@ function FindTilesTypes(fileNumber){
 			}
 		}
 
-		
+
 
 	}
 
@@ -561,6 +773,9 @@ function FindTilesTypes(fileNumber){
 				SetProbsForOnlyLowLevel(dep) //depth
 			}
 
+			
+
+			GenerateTopLevel();
 
 			var saveText = document.getElementById("saveText");
 			var saveGraphic = document.getElementById("saveGraphic");
@@ -570,6 +785,53 @@ function FindTilesTypes(fileNumber){
 
 
 
+		}
+
+
+		function createNewParagraph(string) {
+			var text = string;
+			var newParagraph = document.createElement('p');
+			newParagraph.textContent = text;
+			document.getElementById("textOutputTab").appendChild(newParagraph);
+		}
+
+
+		function changeTrainingMaps() {
+			var x = document.getElementById("fileinput");
+			if(x.disabled == true){
+				x.disabled = false;
+			}else{
+				x.disabled = true;
+			}
+
+		}
+
+		function samplingReady(){
+			var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
+			tileTypes = [];
+
+			var file = document.getElementById("fileinput").files[0];
+			if(file && userYourOwnMapsRadio.checked == true || userYourOwnMapsRadio.checked == false){
+				var samplingMapsButton = document.getElementById("samplingMapsButton");
+				samplingMapsButton.disabled = false;
+				MdMCExperiments();
+			}
+			else{
+				alert("Please choose Training Maps!");
+			}
+		}
+
+		
+
+
+		function ResizeVectors(){
+
+			Totals.length = NumberMatrices;
+			Probabilities.length = NumberMatrices;
+			if (Hierarchical){
+				HierTotals.length = NumberMatrices;
+				HierProbabilities.length = NumberMatrices;
+			}
 		}
 
 
@@ -584,12 +846,15 @@ function FindTilesTypes(fileNumber){
 			var heightValue = document.getElementById("height").value; 
 			var widthValue = document.getElementById("width").value;
 			var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
+			lookahead = document.getElementById("lookahead").value;
+			mapHeight = document.getElementById("height").value;
+			mapWidth = document.getElementById("width").value;
 
 			fileContent = [];
 
 			if(userYourOwnMapsRadio.checked == false){
 
-				jQuery.get('http://localhost/HMdMC/mario_1.txt', function(data) {
+				jQuery.get('http://localhost/HMdMC/foo.txt', function(data) {
 					fileContent.push(data);
 					
 					/*Show MAP
@@ -610,12 +875,13 @@ function FindTilesTypes(fileNumber){
 					
 				});
 				*/
-				
+
 				//CAPTAR LETRAS
 
 			}else{
 
 				//var file = document.getElementById("fileinput").files[0];
+				
 				if (file) {
 					var reader = new FileReader();
 					reader.readAsText(file, "UTF-8");
@@ -630,6 +896,7 @@ function FindTilesTypes(fileNumber){
 				}
 
 			}
+			
 		}
 
 		//--------------------- SITE FUNCTIONS -------------------------------------------
@@ -846,12 +1113,12 @@ function FindTilesTypes(fileNumber){
 
 							<div class="input-group">
 								<span class="input-group-addon" >Row Splits&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
-								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "1">
+								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "12">
 							</div>
 							<br>
 							<div class="input-group">
 								<span class="input-group-addon" >Lookahead&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
-								<input type="text" class="form-control"  aria-describedby="lookahead" id="lookahead" value = "3">
+								<input type="text" class="form-control"  aria-describedby="lookahead" id="lookahead" value = "6">
 							</div>
 							<br>	
 							<div class="input-group">
