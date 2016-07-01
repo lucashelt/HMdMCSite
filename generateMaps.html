@@ -242,8 +242,8 @@ function GenerateTopLevel(){
 
 
 	for (var i = 0; i < NumberMatrices; i++){
-        NumberTilesWithEachMatrix.push(0);
-    }
+		NumberTilesWithEachMatrix.push(0);
+	}
 
 	var PossibleTiles = [];
 	PossibleTiles.length = tileTypes.length;
@@ -275,21 +275,21 @@ function GenerateTopLevel(){
 			//if it fails, and we are using a fallback strategy, try to generate with the second config matrix
             //if a good tile is generated with first method, track it
             if (id != 100){
-                NumberTilesWithEachMatrix[0]++;
+            	NumberTilesWithEachMatrix[0]++;
             }
 
             var WhichDepMat = 1;
             while (id == 100 && WhichDepMat < NumberMatrices){
 
-                id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, WhichDepMat, lookahead, WhichDepMat);
+            	id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, WhichDepMat, lookahead, WhichDepMat);
                 //track how many tiles generated with fallback method
                 if (id != 100){
-                    NumberTilesWithEachMatrix[WhichDepMat]++;
-                    break;
+                	NumberTilesWithEachMatrix[WhichDepMat]++;
+                	break;
                 }
                 else{
 
-                    WhichDepMat++;
+                	WhichDepMat++;
                 }
             }
 
@@ -297,31 +297,42 @@ function GenerateTopLevel(){
             if (id == 100){
                 //ignore one of the tiles
                 while (id == 100 || (tileTypes == start)){
-            
-                   var maximum = tileTypes.length - 1; 
-                   var minimum = 1;	
-                   id = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
-                    
+
+                	var maximum = tileTypes.length - 1; 
+                	var minimum = 1;	
+                	id = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+
                 }
             }
 
             MapGen[h][j] = tileTypes[id];
 
-		}
-	}
+        }
+    }
 
-	
-	var aux = "";
-	for(var i = 0; i < MapGen.length; i++){
-		for(var j = 0; j < MapGen[i].length;j++){
-			aux += MapGen[i][j];
-			if(j == MapGen[i].length- 1){
-				createNewParagraph(aux);
-				aux = "";
-			}
-		}
-	}
-	
+    var char;
+    var aux = "";
+    for(var i = 0; i < MapGen.length; i++){
+    	for(var j = 0; j < MapGen[i].length;j++){
+    		aux += MapGen[i][j];
+
+
+    		char = MapGen[i][j];
+    		if(i < MapGen.length - 3 && char == "#"){
+				createNewImage("mario","#2");
+    		}else{
+			createNewImage("mario",MapGen[i][j]);
+    		}
+
+    		
+    		if(j == MapGen[i].length- 1){
+    			createNewImage("mario","space");
+    			createNewParagraph(aux);
+    			aux = "";
+    		}
+    	}
+    }
+
 
 
 }
@@ -346,7 +357,7 @@ function SetProbsForOnlyLowLevel(WhichDepMat){
 	if (Hierarchical == false){
 		Probabilities[WhichDepMat] = [];
 		var Tmp = [];
-		 
+
 		while (i < TotalsFile * NumberOfRowSplits){
 			Tmp.push(P);
 			i++;
@@ -383,7 +394,7 @@ function SetProbsForOnlyLowLevel(WhichDepMat){
 			}
 		}
 	}
-  
+
 	if(Hierarchical){ 
 
 				// ------------ NEED TO FIX FOR HIERARCHICAL ------------------ VVVVVVVVVVVVVVVVVVVVVVVVVVVV ----------- XXXXX
@@ -493,8 +504,8 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 						MapVec[0].push(TempVec); //parte de vetores
 						indexTemp = 0;
 						TempVec = [];
-					
-					
+
+
 
 					}else{
 						TempVec[indexTemp] = char;
@@ -594,7 +605,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 			
 			createNewParagraph("---------------------------------------------------------");
 			*/
-		
+
 		}
 
 		function InitFiles(WhichDepMat){
@@ -765,6 +776,9 @@ function FindTilesTypes(fileNumber){
 		function samplesGenerated(){
 
 			
+
+
+
 			//alert(fileContent);
 			//tileTypes.indexOf("a");
 
@@ -787,13 +801,13 @@ function FindTilesTypes(fileNumber){
 			SetRows();
 			ResizeVectors();	
 
-	
+
 
 			for(var i = 0; i < NumberMatrices; i++){
 				InitFiles(i);
 			}
 
-					
+
 			for(var dep = 0; dep < NumberMatrices; dep++){
 				SetTotalsTopLevel(dep,fileContent.length) //depth, trainingMaps
 			}
@@ -807,89 +821,132 @@ function FindTilesTypes(fileNumber){
 			GenerateTopLevel();
 /*
 
-			*/
-			var saveText = document.getElementById("saveText");
-			var saveGraphic = document.getElementById("saveGraphic");
+*/
+var saveText = document.getElementById("saveText");
+var saveGraphic = document.getElementById("saveGraphic");
 
-			saveText.disabled = false;
-			saveGraphic.disabled = false;
-
-
-
-		}
-
-
-		function createNewParagraph(string) {
-			var text = string;
-			var newParagraph = document.createElement('p');
-			newParagraph.textContent = text;
-			document.getElementById("textOutputTab").appendChild(newParagraph);
-		}
-
-
-		function changeTrainingMaps() {
-			var x = document.getElementById("fileinput");
-			if(x.disabled == true){
-				x.disabled = false;
-			}else{
-				x.disabled = true;
-			}
-
-		}
-
-		function samplingReady(){
-			var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
-			tileTypes = [];
-
-			var file = document.getElementById("fileinput").files[0];
-			if(file && userYourOwnMapsRadio.checked == true || userYourOwnMapsRadio.checked == false){
-				var samplingMapsButton = document.getElementById("samplingMapsButton");
-				samplingMapsButton.disabled = false;
-				MdMCExperiments();
-			}
-			else{
-				alert("Please choose Training Maps!");
-			}
-		}
-
-		
-
-
-		function ResizeVectors(){
-
-			Totals.length = NumberMatrices;
-			Probabilities.length = NumberMatrices;
-			if (Hierarchical){
-				HierTotals.length = NumberMatrices;
-				HierProbabilities.length = NumberMatrices;
-			}
-		}
-
-
-		function MdMCExperiments(){
-
-			var trainingFolderNameValue = document.getElementById("fileinput").value;
-			var rowSplitsValue = document.getElementById("rowSplits").value;
-			var lookaheadValue = document.getElementById("lookahead").value; 
-			var networkStructureValue = "2"; 
-			var trainingMapsValue = "10"; 
-			var toGenerateValue = "100"; 
-			var heightValue = document.getElementById("height").value; 
-			var widthValue = document.getElementById("width").value;
-			var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
-			lookahead = document.getElementById("lookahead").value;
-			mapHeight = document.getElementById("height").value;
-			mapWidth = document.getElementById("width").value;
-
-			fileContent = [];
-
-			if(userYourOwnMapsRadio.checked == false){
+saveText.disabled = false;
+saveGraphic.disabled = false;
 
 
 
-				jQuery.get('http://localhost/HMdMC/mario_2.txt', function(data) {
-					fileContent.push(data);
-					
+}
+
+
+function createNewParagraph(string) {
+	var text = string;
+	var newParagraph = document.createElement('p');
+	newParagraph.textContent = text;
+	document.getElementById("textOutputTab").appendChild(newParagraph);
+}
+
+function createNewImage(game, tile) {
+
+	if(game == "mario"){
+	var img=document.createElement("img");
+
+	if(tile == "space"){
+		var newParagraph = document.createElement('div');
+		newParagraph.id = "space";
+		document.getElementById("graphicOutputTab").appendChild(newParagraph);
+	}		
+	else if (tile == "#"){
+		img.src="Images_Mario/G.png";
+	}
+	else if (tile == "p"){
+		img.src="Images_Mario/P.png";
+	}
+	else if (tile == "P"){
+		img.src="Images_Mario/P2.png";
+	}
+	else if (tile == "B"){
+		img.src="Images_Mario/B.png";
+	}
+	else if (tile == "?"){
+		img.src="Images_Mario/B2.png";
+	}
+	else if (tile == "#2"){
+		img.src="Images_Mario/G2.png";
+	}
+	else if (tile == "-"){
+		img.src="Images_Mario/E.png";
+	}
+
+
+	
+
+	img.id="picture";
+	var foo = document.getElementById("graphicOutputTab");
+	foo.appendChild(img);
+
+}
+}
+
+
+
+function changeTrainingMaps() {
+	var x = document.getElementById("fileinput");
+	if(x.disabled == true){
+		x.disabled = false;
+	}else{
+		x.disabled = true;
+	}
+
+}
+
+function samplingReady(){
+	var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
+	tileTypes = [];
+
+	var file = document.getElementById("fileinput").files[0];
+	if(file && userYourOwnMapsRadio.checked == true || userYourOwnMapsRadio.checked == false){
+		var samplingMapsButton = document.getElementById("samplingMapsButton");
+		samplingMapsButton.disabled = false;
+		MdMCExperiments();
+	}
+	else{
+		alert("Please choose Training Maps!");
+	}
+}
+
+
+
+
+function ResizeVectors(){
+
+	Totals.length = NumberMatrices;
+	Probabilities.length = NumberMatrices;
+	if (Hierarchical){
+		HierTotals.length = NumberMatrices;
+		HierProbabilities.length = NumberMatrices;
+	}
+}
+
+
+function MdMCExperiments(){
+
+	var trainingFolderNameValue = document.getElementById("fileinput").value;
+	var rowSplitsValue = document.getElementById("rowSplits").value;
+	var lookaheadValue = document.getElementById("lookahead").value; 
+	var networkStructureValue = "2"; 
+	var trainingMapsValue = "10"; 
+	var toGenerateValue = "100"; 
+	var heightValue = document.getElementById("height").value; 
+	var widthValue = document.getElementById("width").value;
+	var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
+	lookahead = document.getElementById("lookahead").value;
+	mapHeight = document.getElementById("height").value;
+	mapWidth = document.getElementById("width").value;
+
+	fileContent = [];
+
+	if(userYourOwnMapsRadio.checked == false){
+
+
+
+		jQuery.get('http://localhost/HMdMC/mario_2.txt', function(data) {
+			fileContent.push(data);
+
 					/*Show MAP
 					var aux = "";
 					for(var i = 0; i < fileContent[0].length; i++){
@@ -996,7 +1053,7 @@ function FindTilesTypes(fileNumber){
 			parameters.disabled = true;
 			clusteringBasedRadio.disabled = true;
 			formHighLevelConvertion.disabled = true;
-				newtworkStructure.disabled = false;
+			newtworkStructure.disabled = false;
 
 			MdMC = true;
 			HMdMC = false;
@@ -1253,9 +1310,9 @@ function FindTilesTypes(fileNumber){
 					</div>
 
 				</div>
-				<div id="menu2" class="tab-pane fade" id="graphicOutputTab" >
+				<div id="menu2" class="tab-pane fade"  >
 
-					<div id="textOutputTab">
+					<div id="graphicOutputTab">
 
 					</div>
 					<div id="divButtons2">
