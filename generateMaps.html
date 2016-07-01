@@ -13,7 +13,7 @@
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-		<script src="Classes/CommonStructs.js"></script>
+		
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 
@@ -66,10 +66,10 @@
 		var NumberTilesWithEachMatrix = [];
 		var start = 0;
 
-		function GenerateTopLevelTile(PossibleTiles, h, w, offset, WhichDepMat, depth){
+		function GenerateTopLevelTile(PossibleTiles, h, w, offset, WhichDepMat, depth, method){
 
 			
-
+			
 			//PT.splice(2,1); remover from array
 
 			var id = -1;
@@ -88,7 +88,7 @@
 				//check if this state has been observed before
 				for (var k = 0; k < 5; k++){
 					for (var m = 2; m >= 0; m--){
-						if (DependencyMatrices[0][k][m] == 1){
+						if (DependencyMatrices[method][k][m] == 1){
 							if (((h + (k - 2)) < 0) || ((h + (k - 2)) >= mapHeight) || ((w + (m - 2)) < 0))
 								type = start;
 							else{
@@ -109,6 +109,7 @@
 		for (var a = 0; a < PT.length; a++){
 			for (var x = 0; x < tileTypes.length; x++){
 				if (PT[a] == tileTypes[x]){
+					
 					if (Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x] != 0){
 						Obs = true;
 						x = tileTypes.length;
@@ -194,7 +195,7 @@
 			if (depth > 0){
 
 				if (w < mapWidth-1){
-					test = GenerateTopLevelTile(tileTypes, h, w+1, offset, WhichDepMat, depth - 1);
+					test = GenerateTopLevelTile(tileTypes, h, w+1, offset, WhichDepMat, depth - 1, method);
 					
 				}
 			}
@@ -269,7 +270,7 @@ function GenerateTopLevel(){
 			currRow = NumberOfRowSplits - 1;
 		}
 		for(var j = 0; j < MapGen[h].length; j++){
-			var id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, 0, lookahead); // CORRETO ATE AQUI
+			var id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, 0, lookahead, 0); // CORRETO ATE AQUI
 			
 			//if it fails, and we are using a fallback strategy, try to generate with the second config matrix
             //if a good tile is generated with first method, track it
@@ -280,28 +281,36 @@ function GenerateTopLevel(){
             var WhichDepMat = 1;
             while (id == 100 && WhichDepMat < NumberMatrices){
 
-                id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, WhichDepMat, lookahead);
+                id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, WhichDepMat, lookahead, WhichDepMat);
                 //track how many tiles generated with fallback method
                 if (id != 100){
                     NumberTilesWithEachMatrix[WhichDepMat]++;
                     break;
                 }
-                else
+                else{
+
                     WhichDepMat++;
+                }
             }
 
             //if it also fails, or we are not using a fallback strategy, generate a tile at random
             if (id == 100){
                 //ignore one of the tiles
                 while (id == 100 || (tileTypes == start)){
-                    id = (Math.random() % (tileTypes.length - 1)) + 1;
+            
+                   var maximum = tileTypes.length - 1; 
+                   var minimum = 1;	
+                   id = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+                    
                 }
             }
+
             MapGen[h][j] = tileTypes[id];
 
 		}
 	}
 
+	
 	var aux = "";
 	for(var i = 0; i < MapGen.length; i++){
 		for(var j = 0; j < MapGen[i].length;j++){
@@ -337,6 +346,7 @@ function SetProbsForOnlyLowLevel(WhichDepMat){
 	if (Hierarchical == false){
 		Probabilities[WhichDepMat] = [];
 		var Tmp = [];
+		 
 		while (i < TotalsFile * NumberOfRowSplits){
 			Tmp.push(P);
 			i++;
@@ -346,7 +356,8 @@ function SetProbsForOnlyLowLevel(WhichDepMat){
 				Probabilities[WhichDepMat].push(Tmp);
 				Tmp = [];
 			}
-		}  
+		}
+		//createNewParagraph(Probabilities[WhichDepMat].length);  
 	}
 	else{
 		var Tmp = [];
@@ -372,7 +383,7 @@ function SetProbsForOnlyLowLevel(WhichDepMat){
 			}
 		}
 	}
-
+  
 	if(Hierarchical){ 
 
 				// ------------ NEED TO FIX FOR HIERARCHICAL ------------------ VVVVVVVVVVVVVVVVVVVVVVVVVVVV ----------- XXXXX
@@ -401,12 +412,15 @@ function SetProbsForOnlyLowLevel(WhichDepMat){
         }
     }
 
+
+
     /*
     for(var i = 0; i < Probabilities[WhichDepMat].length; i++){ // SHOW PROPABILITIES MATRICES IN THE TEXT OUTPUT
     	createNewParagraph(Probabilities[WhichDepMat][i]);
     }
     createNewParagraph("-----------------------------------------------");
     */
+    
 }
 
 
@@ -432,6 +446,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 	}
 
 	var TotalsFile = TotalMatrix[WhichDepMat][0].length * TotalMatrix[WhichDepMat][0][0].length;			
+
 
 	if(Totals[WhichDepMat] == null){
 		Totals[WhichDepMat] = [];
@@ -467,21 +482,25 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 				InputMapSize = fileContent[maps].length;
 				MapVec.push([]); // Vetor inteiro
 				
+
+
 				for(m = 0; m < InputMapSize; m++){
 					var char = fileContent[maps][m];
 
+					if(char == '\n' ||  char == '\t'){
+						
 
-					if(char == '\n' || char == '\r' || char == '\t'){
 						MapVec[0].push(TempVec); //parte de vetores
 						indexTemp = 0;
 						TempVec = [];
+					
+					
 
 					}else{
 						TempVec[indexTemp] = char;
 						indexTemp++;
 					}
 				}
-
 				var ID;
 				var P;
 				var id;
@@ -498,8 +517,9 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
 				var currRow = Math.floor(h/rowsPerSplit);
 				
-				if(currRow >= NumberOfRowSplits)
+				if(currRow >= NumberOfRowSplits){
 					currRow = NumberOfRowSplits - 1;
+				}
 				
 				
 				
@@ -553,7 +573,9 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
 					
 					//createNewParagraph(ID);
+
 					Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][id]++;
+
 					Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][numTypes]++;
 
 
@@ -565,12 +587,14 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
 			/*
 			for(var i = 0; i < Totals[WhichDepMat].length; i++){  //SHOW TOTALS MATRICES IN TEXT OUTPUT
-			createNewParagraph(Totals[WhichDepMat][i])
+			
+			createNewParagraph(Totals[WhichDepMat][i]);
+		
 			}
 			
 			createNewParagraph("---------------------------------------------------------");
 			*/
-
+		
 		}
 
 		function InitFiles(WhichDepMat){
@@ -655,7 +679,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 	}
 	TempDepMat[2][2] = 2;				//block we are finding the probability for
 	
-	if (TopDown == false){				//if we are generating from the top down...	
+	if (TopDown == true){				//if we are generating from the top down...	
 		if (DepMatrix == 1)				//use the previous block to determine probability
 			TempDepMat[2][1] = 1;
 		else if (DepMatrix == 2){		//use the previous block and the block above to determine probability
@@ -682,6 +706,9 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
 	NumberMatrices++;
 	DependencyMatrices.push(TempDepMat);
+
+
+	
 
 	if(DepMatrix == 0)
 		DepComplexities.push(0);
@@ -742,7 +769,7 @@ function FindTilesTypes(fileNumber){
 			//tileTypes.indexOf("a");
 
 
-			var networkStructure = 1;
+			var networkStructure = 2;
 
 			Hierarchical = HMdMC;
 
@@ -756,15 +783,17 @@ function FindTilesTypes(fileNumber){
 				SetDepMatrix(i);
 			}
 			
+			
 			SetRows();
 			ResizeVectors();	
 
+	
 
 			for(var i = 0; i < NumberMatrices; i++){
 				InitFiles(i);
 			}
 
-			
+					
 			for(var dep = 0; dep < NumberMatrices; dep++){
 				SetTotalsTopLevel(dep,fileContent.length) //depth, trainingMaps
 			}
@@ -776,7 +805,9 @@ function FindTilesTypes(fileNumber){
 			
 
 			GenerateTopLevel();
+/*
 
+			*/
 			var saveText = document.getElementById("saveText");
 			var saveGraphic = document.getElementById("saveGraphic");
 
@@ -854,7 +885,7 @@ function FindTilesTypes(fileNumber){
 
 			if(userYourOwnMapsRadio.checked == false){
 
-				jQuery.get('http://localhost/HMdMC/foo.txt', function(data) {
+				jQuery.get('http://localhost/HMdMC/mario_2.txt', function(data) {
 					fileContent.push(data);
 					
 					/*Show MAP
@@ -1113,12 +1144,12 @@ function FindTilesTypes(fileNumber){
 
 							<div class="input-group">
 								<span class="input-group-addon" >Row Splits&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
-								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "12">
+								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "1">
 							</div>
 							<br>
 							<div class="input-group">
 								<span class="input-group-addon" >Lookahead&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
-								<input type="text" class="form-control"  aria-describedby="lookahead" id="lookahead" value = "6">
+								<input type="text" class="form-control"  aria-describedby="lookahead" id="lookahead" value = "1">
 							</div>
 							<br>	
 							<div class="input-group">
