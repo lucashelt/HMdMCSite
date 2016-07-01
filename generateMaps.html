@@ -318,7 +318,7 @@ function GenerateTopLevel(){
 
 
     		char = MapGen[i][j];
-    		if(i < MapGen.length - 3 && char == "#"){
+    		if(i < MapGen.length - 2 && char == "#"){
 				createNewImage("mario","#2");
     		}else{
 			createNewImage("mario",MapGen[i][j]);
@@ -870,6 +870,8 @@ function createNewImage(game, tile) {
 	}
 	else if (tile == "-"){
 		img.src="Images_Mario/E.png";
+	}else{
+		img.src="Images_Mario/E.png";
 	}
 
 
@@ -944,7 +946,7 @@ function MdMCExperiments(){
 
 
 
-		jQuery.get('http://localhost/HMdMC/mario_2.txt', function(data) {
+		jQuery.get('http://localhost/HMdMC/foo.txt', function(data) {
 			fileContent.push(data);
 
 					/*Show MAP
