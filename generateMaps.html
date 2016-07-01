@@ -769,7 +769,7 @@ function FindTilesTypes(fileNumber){
 			//tileTypes.indexOf("a");
 
 
-			var networkStructure = 2;
+			var networkStructure = document.getElementById("newtworkStructure").value;
 
 			Hierarchical = HMdMC;
 
@@ -885,6 +885,8 @@ function FindTilesTypes(fileNumber){
 
 			if(userYourOwnMapsRadio.checked == false){
 
+
+
 				jQuery.get('http://localhost/HMdMC/mario_2.txt', function(data) {
 					fileContent.push(data);
 					
@@ -900,8 +902,8 @@ function FindTilesTypes(fileNumber){
 					*/
 				});
 
-/*SECOND MAP
-			jQuery.get('http://localhost/HMdMC/mario_2.txt', function(data) {
+/*
+			jQuery.get('http://localhost/HMdMC/mario_3.txt', function(data) {
 				fileContent.push(data);
 					
 				});
@@ -954,6 +956,7 @@ function FindTilesTypes(fileNumber){
 			var parameters = document.getElementById("parameters");
 			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
 			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+			var newtworkStructure = document.getElementById("newtworkStructure");
 
 			rowSplits.disabled = true;
 			lookahead.disabled = true;
@@ -964,6 +967,7 @@ function FindTilesTypes(fileNumber){
 			parameters.disabled = true;
 			clusteringBasedRadio.disabled = true;
 			formHighLevelConvertion.disabled = true;
+			newtworkStructure.disabled = true;
 
 			MdMC = false;
 			HMdMC = false;
@@ -981,6 +985,7 @@ function FindTilesTypes(fileNumber){
 			var parameters = document.getElementById("parameters");
 			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
 			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+			var newtworkStructure = document.getElementById("newtworkStructure");
 
 			rowSplits.disabled = false;
 			lookahead.disabled = false;
@@ -991,6 +996,7 @@ function FindTilesTypes(fileNumber){
 			parameters.disabled = true;
 			clusteringBasedRadio.disabled = true;
 			formHighLevelConvertion.disabled = true;
+				newtworkStructure.disabled = false;
 
 			MdMC = true;
 			HMdMC = false;
@@ -1008,6 +1014,7 @@ function FindTilesTypes(fileNumber){
 			var parameters = document.getElementById("parameters");
 			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
 			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+			var newtworkStructure = document.getElementById("newtworkStructure");
 
 			rowSplits.disabled = false;
 			lookahead.disabled = false;
@@ -1018,6 +1025,7 @@ function FindTilesTypes(fileNumber){
 			parameters.disabled = false;
 			clusteringBasedRadio.disabled = false;
 			formHighLevelConvertion.disabled = true;
+			newtworkStructure.disabled = false;
 
 			manualRadio.checked = true;
 			clusteringBasedRadio.checked = false;
@@ -1144,7 +1152,7 @@ function FindTilesTypes(fileNumber){
 
 							<div class="input-group">
 								<span class="input-group-addon" >Row Splits&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
-								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "1">
+								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "12">
 							</div>
 							<br>
 							<div class="input-group">
@@ -1153,8 +1161,8 @@ function FindTilesTypes(fileNumber){
 							</div>
 							<br>	
 							<div class="input-group">
-								<span class="input-group-addon" >Number of Clusters</span>
-								<input type="text" class="form-control"  aria-describedby="numberOfClusters" id="numberOfClusters" disabled = true>
+								<span class="input-group-addon" >Network Structures</span>
+								<input type="text" class="form-control"  aria-describedby="newtworkStructure" id="newtworkStructure" value = "2">
 							</div>	
 
 						</div>
@@ -1171,7 +1179,11 @@ function FindTilesTypes(fileNumber){
 								<span class="input-group-addon" >Tile Size&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
 								<input type="text" class="form-control"  aria-describedby="tileSize"  id="tileSize" disabled = true>
 							</div>
-
+							<br>	
+							<div class="input-group">
+								<span class="input-group-addon" >Number of Clusters</span>
+								<input type="text" class="form-control"  aria-describedby="numberOfClusters" id="numberOfClusters" disabled = true>
+							</div>
 
 						</div>
 
