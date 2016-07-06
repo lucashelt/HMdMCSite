@@ -1,9 +1,5 @@
 
-#container{
-	 width:1300px;
-  height:800px
-  background-color:red;
-}
+
 
 p { 
 	margin:0 }
@@ -22,13 +18,28 @@ header{
 	padding-top:50px;
 }
 
+#container{
+	 padding-left: 5px; 
+	 width:1300px;
+  height:800px
+  background-color:red;
+}
+
+#containerHome{
+	 padding-left: 5px; 
+	 width:1300px;
+  height:800px
+  background-color:red;
+}
+
 #homeButton{
-	padding-left: 900px;
+	padding-left: 880px;
 }
 
 .navbar {
-	min-width: 1350px !important;
-  width:1350px !important;
+	
+	min-width: 100% !important;
+  width:100% !important;
   height:50px !important;
   min-height:50px !important;
 }
@@ -203,8 +214,8 @@ height: 40px;
 font-family: "Courier New", Courier, monospace;
 	margin-top:32px;
 	margin-left:40px;
-height: 480px;
-	width: 2222px;
+
+	width: 2550px;
 	float: left;
 	border:1px;
 
@@ -214,12 +225,12 @@ height: 480px;
 
 	margin-top:32px;
 	margin-left:40px;
-height: 2480px;
-	width: 6222px;
+	width: 4850px;
 
 }
 
 .carousel-inner > .item > img {
+     width: 100%;
     margin: 0 auto;
 }
 

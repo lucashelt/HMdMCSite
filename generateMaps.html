@@ -27,6 +27,8 @@
 
 	<script>
 
+		var numberOfMapsGenerated = 0; 
+
 		var choseGame;
 		var gameName;
 
@@ -438,14 +440,62 @@ for(var i = 0; i < MapGen.length; i++){
 
 		if(j == MapGen[i].length- 1){
 			createNewImage("space","space");
-			createNewParagraph(aux);
+			createNewParagraph(aux,"textOutputTab");
 			aux = "";
 		}
 
 	}
 }
 
+createNewParagraph("Map Number: " + numberOfMapsGenerated,"textOutputTab");
+createNewParagraph("Height: " + mapHeight + " - Width: " + mapWidth +" - Row Splits: " + NumberOfRowSplits + " - Network Structures: " + document.getElementById("networkStructure").value,"textOutputTab");
+createNewParagraph("[End]","textOutputTab");
 
+createNewParagraph("Map Number: " + numberOfMapsGenerated,"graphicOutputTab");
+createNewParagraph("Height: " + mapHeight + " - Width: " + mapWidth +" - Row Splits: " + NumberOfRowSplits + " - Network Structures: " + document.getElementById("networkStructure").value,"graphicOutputTab");
+createNewParagraph("[End]","graphicOutputTab");
+
+
+	//-------------- CLEAR VARIABLES ----------------------
+
+		choseGame = null;
+		 gameName = null;
+
+		 fileContent = [];
+		 tileTypes = [];
+		 hierTileTypes = [];
+		 TopDown = false;
+		 NumberMatrices = 0;
+		 DependencyMatrices = [];
+		 DepComplexities = [];
+		 Hierarchical = false;
+		 Rows = [];
+
+
+		 Totals = [];
+		 Probabilities = [];
+		 HierTotals = [];
+		 HierProbabilities = [];
+
+		 TotalMatrix = [];
+		 ProbMatrix = [];
+		 HierTotalMatrix = [];
+		 HierProbMatrix = [];
+		 NumberOfRowSplits;
+
+		 MapGen = [];
+		 lookahead = null;
+
+		 mapHeight = null;
+		 mapWidth = null;
+
+		 BackTracks = null;
+		 badPipes = null;
+		 NumberTilesWithEachMatrix = [];
+		 start = 0;
+
+		 	var samplingMapsButton = document.getElementById("samplingMapsButton");
+		samplingMapsButton.disabled = true;
 
 }
 
@@ -889,7 +939,7 @@ function FindTilesTypes(fileNumber){
 
 	function samplesGenerated(){
 
-		
+		numberOfMapsGenerated++;
 
 
 
@@ -897,7 +947,7 @@ function FindTilesTypes(fileNumber){
 		//tileTypes.indexOf("a");
 
 
-		var networkStructure = document.getElementById("newtworkStructure").value;
+		var networkStructure = document.getElementById("networkStructure").value;
 
 		Hierarchical = HMdMC;
 
@@ -936,22 +986,18 @@ function FindTilesTypes(fileNumber){
 /*
 
 */
-var saveText = document.getElementById("saveText");
-var saveGraphic = document.getElementById("saveGraphic");
 
-saveText.disabled = false;
-saveGraphic.disabled = false;
 
 
 
 }
 
 
-function createNewParagraph(string) {
+function createNewParagraph(string,element) {
 	var text = string;
 	var newParagraph = document.createElement('p');
 	newParagraph.textContent = text;
-	document.getElementById("textOutputTab").appendChild(newParagraph);
+	document.getElementById(element).appendChild(newParagraph);
 }
 
 function createNewImage(game, tile) {
@@ -1083,6 +1129,56 @@ function samplingReady(){
 	var userYourOwnMapsRadio = document.getElementById("userYourOwnMapsRadio");
 	tileTypes = [];
 
+	var ready = true;
+	var width = document.getElementById("width").value;
+	var height = document.getElementById("height").value;
+	var rowSplits = document.getElementById("rowSplits").value;
+	var networkStructure = document.getElementById("networkStructure").value;
+
+	if(width > 300){
+		ready = false;
+		alert("Max Width: 300!");
+		document.getElementById("width").value = 300;
+	}
+	if(width < 12){
+		ready = false;
+		alert("Min Width: 12!");
+		document.getElementById("width").value = 12;
+	}
+	if(height > 200){
+		ready = false;
+		alert("Max Height: 200!");
+		document.getElementById("height").value = 200;
+	}
+	if(height < 12){
+		ready = false;
+		alert("Min Height: 12!");
+		document.getElementById("height").value = 12;
+	}
+	if(rowSplits > 12){
+		ready = false;
+		alert("Max Number of Row Splits: 12!");
+		document.getElementById("rowSplits").value = 12;
+	}
+
+	if(rowSplits < 1){
+		ready = false;
+		alert("Min Number of Row Splits: 1!");
+		document.getElementById("rowSplits").value = 1;
+	}
+	if(networkStructure > 3){
+		ready = false;
+		alert("Max Network Structure: 3!");
+		document.getElementById("networkStructure").value = 3;
+	}
+	if(networkStructure < 0){
+		ready = false;
+		alert("Min Network Structure: 0!");
+		document.getElementById("networkStructure").value = 0;
+	}
+	
+
+	if (ready){
 	var file = document.getElementById("fileinput").files[0];
 	if(file && userYourOwnMapsRadio.checked == true || userYourOwnMapsRadio.checked == false){
 		var samplingMapsButton = document.getElementById("samplingMapsButton");
@@ -1091,6 +1187,7 @@ function samplingReady(){
 	}
 	else{
 		alert("Please choose Training Maps!");
+	}
 	}
 }
 
@@ -1194,24 +1291,30 @@ function MdMCExperiments(){
 
 
 		if(selectedValue == "loderunner"){
+			$('#textOutputTab').empty();
+			$('#graphicOutputTab').empty();
 			document.getElementById("rowSplits").value = 12;
 			document.getElementById("height").value = 22;
 			document.getElementById("width").value = 32;
-			document.getElementById("newtworkStructure").value = 3;
+			document.getElementById("networkStructure").value = 3;
 		}
 
 		else if(selectedValue == "superMarioBros"){
+			$('#textOutputTab').empty();
+			$('#graphicOutputTab').empty();
 			document.getElementById("rowSplits").value = 12;
 			document.getElementById("height").value = 12;
 			document.getElementById("width").value = 210;
-			document.getElementById("newtworkStructure").value = 2;
+			document.getElementById("networkStructure").value = 2;
 		}
 
 		else if(selectedValue == "kidIcarus"){
+			$('#textOutputTab').empty();
+			$('#graphicOutputTab').empty();
 			document.getElementById("rowSplits").value = 12;
 			document.getElementById("height").value = 173;
 			document.getElementById("width").value = 16;
-			document.getElementById("newtworkStructure").value = 3;
+			document.getElementById("networkStructure").value = 3;
 		}
 	}
 
@@ -1225,7 +1328,7 @@ function MdMCExperiments(){
 		var parameters = document.getElementById("parameters");
 		var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
 		var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
-		var newtworkStructure = document.getElementById("newtworkStructure");
+		var newworkStructure = document.getElementById("networkStructure");
 
 		rowSplits.disabled = true;
 		lookahead.disabled = true;
@@ -1236,7 +1339,7 @@ function MdMCExperiments(){
 		parameters.disabled = true;
 		clusteringBasedRadio.disabled = true;
 		formHighLevelConvertion.disabled = true;
-		newtworkStructure.disabled = true;
+		networkStructure.disabled = true;
 
 		MdMC = false;
 		HMdMC = false;
@@ -1254,7 +1357,7 @@ function MdMCExperiments(){
 		var parameters = document.getElementById("parameters");
 		var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
 		var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
-		var newtworkStructure = document.getElementById("newtworkStructure");
+		var networkStructure = document.getElementById("networkStructure");
 
 		rowSplits.disabled = false;
 		lookahead.disabled = true;
@@ -1265,7 +1368,7 @@ function MdMCExperiments(){
 		parameters.disabled = true;
 		clusteringBasedRadio.disabled = true;
 		formHighLevelConvertion.disabled = true;
-		newtworkStructure.disabled = false;
+		networkStructure.disabled = false;
 
 		MdMC = true;
 		HMdMC = false;
@@ -1283,7 +1386,7 @@ function MdMCExperiments(){
 		var parameters = document.getElementById("parameters");
 		var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
 		var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
-		var newtworkStructure = document.getElementById("newtworkStructure");
+		var networkStructure = document.getElementById("networkStructure");
 
 		rowSplits.disabled = false;
 		lookahead.disabled = true;
@@ -1294,7 +1397,7 @@ function MdMCExperiments(){
 		parameters.disabled = false;
 		clusteringBasedRadio.disabled = false;
 		formHighLevelConvertion.disabled = true;
-		newtworkStructure.disabled = false;
+		networkStructure.disabled = false;
 
 		manualRadio.checked = true;
 		clusteringBasedRadio.checked = false;
@@ -1391,10 +1494,10 @@ function MdMCExperiments(){
 							<label><input type="radio" name="RadioChooseAMethod" value="MdMC" checked onchange="changeToMdMC()"> Multi-Dimensional Markov chains (MdMC)<br></label>
 						</div>
 						<div class="radio" >
-							<label><input type="radio" name="RadioChooseAMethod" value="HMdMC" onchange="changeToHMdMC()"> Hierarchical Multi-Dimensional Markov chains (HMdMC)<br></label>
+							<label><input type="radio" name="RadioChooseAMethod" value="HMdMC" onchange="changeToHMdMC()" disabled = true> Hierarchical Multi-Dimensional Markov chains (HMdMC)<br></label>
 						</div>
 						<div class="radio" >
-							<label><input type="radio" name="RadioChooseAMethod" value="MRF" onchange="changeToMRF()"> Markov Random Fields (MRF)<br></label>
+							<label><input type="radio" name="RadioChooseAMethod" value="MRF" onchange="changeToMRF()" disabled = true> Markov Random Fields (MRF)<br></label>
 						</div>
 
 					</fieldset>
@@ -1422,7 +1525,7 @@ function MdMCExperiments(){
 
 							<div class="input-group">
 								<span class="input-group-addon" >Row Splits&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
-								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "12">
+								<input type="text" class="form-control"  aria-describedby="rowSplits" id="rowSplits" value = "12" >
 							</div>
 							<br>
 							<div class="input-group">
@@ -1432,7 +1535,7 @@ function MdMCExperiments(){
 							<br>	
 							<div class="input-group">
 								<span class="input-group-addon" >Network Structures</span>
-								<input type="text" class="form-control"  aria-describedby="newtworkStructure" id="newtworkStructure" value = "2">
+								<input type="text" class="form-control"  aria-describedby="networkStructure" id="networkStructure" value = "2">
 							</div>	
 
 						</div>
@@ -1518,6 +1621,8 @@ function MdMCExperiments(){
 					<div id="textOutputTab">
 
 					</div>
+
+				
 					
 
 				</div>
@@ -1527,6 +1632,8 @@ function MdMCExperiments(){
 
 					</div>
 					
+
+				
 
 				</div>
 			</div>
