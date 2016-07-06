@@ -13,7 +13,7 @@
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-		
+
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 
@@ -28,6 +28,7 @@
 	<script>
 
 		var choseGame;
+		var gameName;
 
 		var MdMC = true;
 		var HMdMC = false;
@@ -68,174 +69,177 @@
 
 		function GenerateTopLevelTile(PossibleTiles, h, w, offset, WhichDepMat, depth, method){
 
-			
-			
-			//PT.splice(2,1); remover from array
 
-			var id = -1;
-			var selector;
-			
-			var type = start;
-			var PT = PossibleTiles;
-			var Probs;
 
-			
-			while (PT.length > 0){
+		//PT.splice(2,1); remover from array
 
-				var ID = 0;
-				var P = 0;
+		var id = -1;
+		var selector;
+		
+		var type = start;
+		var PT = PossibleTiles;
+		var Probs;
 
-				//check if this state has been observed before
-				for (var k = 0; k < 5; k++){
-					for (var m = 2; m >= 0; m--){
-						if (DependencyMatrices[method][k][m] == 1){
-							if (((h + (k - 2)) < 0) || ((h + (k - 2)) >= mapHeight) || ((w + (m - 2)) < 0))
-								type = start;
-							else{
-								for (var b = 0; b < tileTypes.length; b++){
-									if (MapGen[h + (k - 2)][w + (m - 2)] == tileTypes[b]){
-										type = b;
-									}
+		
+		while (PT.length > 0){
+
+			var ID = 0;
+			var P = 0;
+
+			//check if this state has been observed before
+			for (var k = 0; k < 5; k++){
+				for (var m = 2; m >= 0; m--){
+					if (DependencyMatrices[method][k][m] == 1){
+						if (((h + (k - 2)) < 0) || ((h + (k - 2)) >= mapHeight) || ((w + (m - 2)) < 0))
+							type = start;
+						else{
+							for (var b = 0; b < tileTypes.length; b++){
+								if (MapGen[h + (k - 2)][w + (m - 2)] == tileTypes[b]){
+									type = b;
 								}
 							}
-							ID += type * Math.pow(tileTypes.length, P);
-							P++;
 						}
+
+
+						ID += type * Math.pow(tileTypes.length, P);
+						P++;
 					}
 				}
+			}
 
-				var Obs = false;
-		//check if the state has been observed before
+			var Obs = false;
+	//check if the state has been observed before
+	for (var a = 0; a < PT.length; a++){
+		for (var x = 0; x < tileTypes.length; x++){
+			if (PT[a] == tileTypes[x]){
+				
+				if (Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x] != 0){
+					Obs = true;
+					x = tileTypes.length;
+					a = PT.length;
+				}
+			}
+		}
+	}
+
+	if (Obs != true && depth != lookahead){		//if this state hasnt been observed and this is NOT the top level in the lookahead
+		
+		BackTracks++;				//then return an error
+		return 99;
+	}
+	else if (Obs != true && depth == lookahead){	//if we havent observed this state, and it IS the first step, then break out of
+		break;								//of the loop, where we will return a random tile
+	}
+	else if (Obs == true){				//if we have observed this state, then generate the next tile
+
+
+		var Norm = 0;
+		Probs = [];
+		Probs.length = PT.length;
+
+		for (var i = 0; i < PT.length; i++){	//reset the value of Probs
+			Probs[i] = 0;
+		}
+
+		
+		
+
+
 		for (var a = 0; a < PT.length; a++){
 			for (var x = 0; x < tileTypes.length; x++){
 				if (PT[a] == tileTypes[x]){
-					
-					if (Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x] != 0){
-						Obs = true;
-						x = tileTypes.length;
-						a = PT.length;
-					}
-				}
-			}
-		}
-
-		if (Obs != true && depth != lookahead){		//if this state hasnt been observed and this is NOT the top level in the lookahead
-			BackTracks++;				//then return an error
-			return 99;
-		}
-		else if (Obs != true && depth == lookahead){	//if we havent observed this state, and it IS the first step, then break out of
-			break;								//of the loop, where we will return a random tile
-		}
-		else if (Obs == true){				//if we have observed this state, then generate the next tile
-
-
-			var Norm = 0;
-			Probs = [];
-			Probs.length = PT.length;
-
-			for (var i = 0; i < PT.length; i++){	//reset the value of Probs
-				Probs[i] = 0;
-			}
-
-			
-			
-
-
-			for (var a = 0; a < PT.length; a++){
-				for (var x = 0; x < tileTypes.length; x++){
-					if (PT[a] == tileTypes[x]){
-						Probs[a] = Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x];
-						Norm += Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x];
-						
-					}
-				}
-			}
-
-
-
-			for (var i = 0; i < PT.length; i++){						//renormalize the probabilities
-				Probs[i] = Probs[i] / Norm;
-			}
-
-
-
-			//PICK THE TILE
-			var PR = 0;
-			var tracker = 0;
-			selector = Math.random();  //2147483647  = RAND_MAX
-			//createNewParagraph(selector.toFixed(10));
-			for (var a = 0; a < PT.length; a++){
-				PR = PR + Probs[a];
-
-				if (Probs[a] > 0){
-					tracker = a;
-				}
-				if (selector <= PR){
-
-					id = a;
-					break;
-				}
-				//if weirdness happens with the probabilities
-				//BROKEN
-                //if (a >= PT.size() - 1 && id == -1)
-				//	id = tracker;
-			}
-			
-			if (h < MapGen.length && w < MapGen[0].length){
-				MapGen[h][w] = PT[id];
-			}
-
-			//call the GenTile function to generate the next tile
-			//set to a test variable, so we can check the validity
-			//of the next state
-			var test = 1;
-
-			
-
-			if (depth > 0){
-
-				if (w < mapWidth-1){
-					test = GenerateTopLevelTile(tileTypes, h, w+1, offset, WhichDepMat, depth - 1, method);
+					Probs[a] = Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x];
+					Norm += Probabilities[WhichDepMat][ID + Rows[WhichDepMat] * offset][x];
 					
 				}
 			}
+		}
 
-            //if the next state isnt valid, remove the tile chosen in this state and try a different one
-            if (test == 99){
 
-            	var j = 0;
-            	if (id < PT.length){
-            		for (var i = 0; i < PT.length; i++){
 
-            			if (PT[j] == PT[id]){
-            				PT.splice(i,1);
-            				break;
-            			}
-            			j++;
-            		}
+		for (var i = 0; i < PT.length; i++){						//renormalize the probabilities
+			Probs[i] = Probs[i] / Norm;
+		}
 
-            	}
-            	else
-            		PT = [];
-            }
-            else{
-            	for (var i = 0; i < tileTypes.length; i++){
-            		if (PT[id] == tileTypes[i])
 
-            			return i;
 
-            	}
-            }
+		//PICK THE TILE
+		var PR = 0;
+		var tracker = 0;
+		selector = Math.random();  //2147483647  = RAND_MAX
+		//createNewParagraph(selector.toFixed(10));
+		for (var a = 0; a < PT.length; a++){
+			PR = PR + Probs[a];
 
-        }	
+			if (Probs[a] > 0){
+				tracker = a;
+			}
+			if (selector <= PR){
+
+				id = a;
+				break;
+			}
+			//if weirdness happens with the probabilities
+			//BROKEN
+            //if (a >= PT.size() - 1 && id == -1)
+			//	id = tracker;
+		}
+		
+		if (h < MapGen.length && w < MapGen[0].length){
+			MapGen[h][w] = PT[id];
+		}
+
+		//call the GenTile function to generate the next tile
+		//set to a test variable, so we can check the validity
+		//of the next state
+		var test = 1;
+
+		
+
+		if (depth > 0){
+
+			if (w < mapWidth-1){
+				test = GenerateTopLevelTile(tileTypes, h, w+1, offset, WhichDepMat, depth - 1, method);
+				
+			}
+		}
+
+        //if the next state isnt valid, remove the tile chosen in this state and try a different one
+        if (test == 99){
+
+        	var j = 0;
+        	if (id < PT.length){
+        		for (var i = 0; i < PT.length; i++){
+
+        			if (PT[j] == PT[id]){
+        				PT.splice(i,1);
+        				break;
+        			}
+        			j++;
+        		}
+
+        	}
+        	else
+        		PT = [];
+        }
+        else{
+        	for (var i = 0; i < tileTypes.length; i++){
+        		if (PT[id] == tileTypes[i])
+
+        			return i;
+
+        	}
+        }
+
     }	
-			if (depth == lookahead){				//if no valid options on top level, return error code 100
-				return 100;
-			}
-			else{
-				BackTracks++;
-		return 99;				//if no valid options on sub level, return error.
-	}
+}	
+		if (depth == lookahead){				//if no valid options on top level, return error code 100
+			return 100;
+		}
+		else{
+			BackTracks++;
+	return 99;				//if no valid options on sub level, return error.
+}
 }
 
 function GenerateTopLevel(){
@@ -270,68 +274,176 @@ function GenerateTopLevel(){
 			currRow = NumberOfRowSplits - 1;
 		}
 		for(var j = 0; j < MapGen[h].length; j++){
-			var id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, 0, lookahead, 0); // CORRETO ATE AQUI
-			
-			//if it fails, and we are using a fallback strategy, try to generate with the second config matrix
-            //if a good tile is generated with first method, track it
-            if (id != 100){
-            	NumberTilesWithEachMatrix[0]++;
-            }
-
-            var WhichDepMat = 1;
-            while (id == 100 && WhichDepMat < NumberMatrices){
-
-            	id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, WhichDepMat, lookahead, WhichDepMat);
-                //track how many tiles generated with fallback method
-                if (id != 100){
-                	NumberTilesWithEachMatrix[WhichDepMat]++;
-                	break;
-                }
-                else{
-
-                	WhichDepMat++;
-                }
-            }
-
-            //if it also fails, or we are not using a fallback strategy, generate a tile at random
-            if (id == 100){
-                //ignore one of the tiles
-                while (id == 100 || (tileTypes == start)){
-
-                	var maximum = tileTypes.length - 1; 
-                	var minimum = 1;	
-                	id = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
-
-                }
-            }
-
-            MapGen[h][j] = tileTypes[id];
-
+		var id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, 0, lookahead, 0); // CORRETO ATE AQUI
+		
+		//if it fails, and we are using a fallback strategy, try to generate with the second config matrix
+        //if a good tile is generated with first method, track it
+        if (id != 100){
+        	NumberTilesWithEachMatrix[0]++;
         }
+
+        var WhichDepMat = 1;
+        while (id == 100 && WhichDepMat < NumberMatrices){
+
+        	id = GenerateTopLevelTile(PossibleTiles, h, j, currRow, WhichDepMat, lookahead, WhichDepMat);
+            //track how many tiles generated with fallback method
+            if (id != 100){
+            	NumberTilesWithEachMatrix[WhichDepMat]++;
+            	break;
+            }
+            else{
+
+            	WhichDepMat++;
+            }
+        }
+
+        //if it also fails, or we are not using a fallback strategy, generate a tile at random
+        if (id == 100){
+            //ignore one of the tiles
+            while (id == 100 || (tileTypes == start)){
+
+            	var maximum = tileTypes.length - 1; 
+            	var minimum = 1;	
+            	id = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+
+            }
+        }
+
+        MapGen[h][j] = tileTypes[id];
+
     }
+}
 
-    var char;
-    var aux = "";
-    for(var i = 0; i < MapGen.length; i++){
-    	for(var j = 0; j < MapGen[i].length;j++){
-    		aux += MapGen[i][j];
+var top = Math.floor(mapHeight * 0.15);
+var bottom = mapHeight - top;
 
+var char;
+var aux = "";
+for(var i = 0; i < MapGen.length; i++){
+	for(var j = 0; j < MapGen[i].length;j++){
+		aux += MapGen[i][j];
 
-    		char = MapGen[i][j];
-    		if(i < MapGen.length - 2 && char == "#"){
+		char = MapGen[i][j];
+		
+		if(gameName == "superMarioBros"){
+			
+			if(i < MapGen.length - 1 && char == "#"){
 				createNewImage("mario","#2");
-    		}else{
-			createNewImage("mario",MapGen[i][j]);
-    		}
+			}
 
-    		
-    		if(j == MapGen[i].length- 1){
-    			createNewImage("mario","space");
-    			createNewParagraph(aux);
-    			aux = "";
-    		}
-    	}
-    }
+			else if (char == "p"){
+				if(MapGen[i-1][j] != "p"){
+					createNewImage("mario","PT");
+				}else{
+					createNewImage("mario",MapGen[i][j]);
+				}
+			}else if (char == "P"){
+				if(MapGen[i-1][j] != "P"){
+					createNewImage("mario","PT2");
+				}else{
+					createNewImage("mario",MapGen[i][j]);
+				}
+			}
+
+			else{
+				createNewImage("mario",MapGen[i][j]);
+			}
+		}
+		else if (gameName == "loderunner"){
+			createNewImage("loderunner",MapGen[i][j]);
+		}
+		else if (gameName == "kidIcarus"){
+
+			if(char == "#"){
+				if(i > 0 && i > top){
+					if(MapGen[i-1][j] != "#"){
+						createNewImage("kidIcarus","F2");
+					}
+					else{
+						if(i <= top){
+							createNewImage("kidIcarus","F3");
+						}else{
+
+							createNewImage("kidIcarus",MapGen[i][j]);
+						}
+					}
+				}
+				else{
+					if(i <= top){
+						createNewImage("kidIcarus","F3");
+					}else{
+
+						createNewImage("kidIcarus",MapGen[i][j]);
+					}
+				}
+			}
+			else if (char == "D"){
+				
+				if(i <= top){
+
+
+					if(i > 0){
+						if(MapGen[i-1][j] != "D"){
+							createNewImage("kidIcarus","DT2");
+						}
+						else{
+							createNewImage("kidIcarus","DT");
+						}
+					}
+					else{
+						createNewImage("kidIcarus","DT");
+					}
+
+				}
+				else if (i >= bottom){
+
+
+					if(i > 0){
+						if(MapGen[i-1][j] != "D"){
+							createNewImage("kidIcarus","DB2");
+						}
+						else{
+							createNewImage("kidIcarus","DB");
+						}
+					}
+					else{
+						createNewImage("kidIcarus","DB");
+					}
+
+				}else{
+
+
+					if(i > 0){
+						if(MapGen[i-1][j] != "D"){
+							createNewImage("kidIcarus","D2");
+						}
+						else{
+							createNewImage("kidIcarus",MapGen[i][j]);
+						}
+					}
+					else{
+						createNewImage("kidIcarus",MapGen[i][j]);
+					}
+				}
+
+
+
+				
+			}
+			else{
+				createNewImage("kidIcarus",MapGen[i][j]);
+			}
+		}
+
+
+		if(j == MapGen[i].length- 1){
+			createNewImage("space","space");
+			createNewParagraph(aux);
+			aux = "";
+		}
+
+	}
+}
 
 
 
@@ -368,70 +480,70 @@ function SetProbsForOnlyLowLevel(WhichDepMat){
 				Tmp = [];
 			}
 		}
-		//createNewParagraph(Probabilities[WhichDepMat].length);  
-	}
-	else{
-		var Tmp = [];
-		HierProbabilities = [];
-		var TMP = [];
-		var innerIndex = 0;
-		var i = 0;
-		var TotalsFile = ProbMatrix[WhichDepMat][0].length * ProbMatrix[WhichDepMat][0][0].length;
-		while (i < TotalsFile * NumberOfRowSplits){
-			Tmp.push(P);
-			i++;
-			index++;
-			if (index == Types){
-				index = 0;
-				TMP.push(Tmp);
-				Tmp = [];
-				innerIndex++;
-				if (innerIndex == Rows[WhichDepMat]){
-					innerIndex = 0;
-					HierProbabilities[WhichDepMat].push(TMP);
-					TMP = [];
-				}
+	//createNewParagraph(Probabilities[WhichDepMat].length);  
+}
+else{
+	var Tmp = [];
+	HierProbabilities = [];
+	var TMP = [];
+	var innerIndex = 0;
+	var i = 0;
+	var TotalsFile = ProbMatrix[WhichDepMat][0].length * ProbMatrix[WhichDepMat][0][0].length;
+	while (i < TotalsFile * NumberOfRowSplits){
+		Tmp.push(P);
+		i++;
+		index++;
+		if (index == Types){
+			index = 0;
+			TMP.push(Tmp);
+			Tmp = [];
+			innerIndex++;
+			if (innerIndex == Rows[WhichDepMat]){
+				innerIndex = 0;
+				HierProbabilities[WhichDepMat].push(TMP);
+				TMP = [];
 			}
 		}
 	}
+}
 
-	if(Hierarchical){ 
+if(Hierarchical){ 
 
-				// ------------ NEED TO FIX FOR HIERARCHICAL ------------------ VVVVVVVVVVVVVVVVVVVVVVVVVVVV ----------- XXXXX
-				for (var k = 0; k < hierTileTypes.length; k++){
-					for (var i = 0; i < Rows[WhichDepMat]; i++){
-						if (HierTotals[WhichDepMat][k][i][Types] == 0)
-                    HierTotals[WhichDepMat][k][i][Types]++;	//if total=0, add 1 to prevent division by 0
-                for (var j = 0; j < Types; j++){
-                	HierProbabilities[WhichDepMat][k][i][j] = HierTotals[WhichDepMat][k][i][j] / HierTotals[WhichDepMat][k][i][Types];   
-                }              
-            }
-        }
-
-    }else{
-
-
-    	for (var i = 0; i < Totals[WhichDepMat].length; i++){
-    		for (var j = 0; j < Totals[WhichDepMat][0].length - 1; j++){
-                //if there is a 0 in the totals column, replace it with a one to avoid div. by 0
-                if (Totals[WhichDepMat][i][Types] == 0){
-                	Totals[WhichDepMat][i][Types]++;
-                }
-                
-                Probabilities[WhichDepMat][i][j] = Totals[WhichDepMat][i][j] / Totals[WhichDepMat][i][Types];
-            }
+			// ------------ NEED TO FIX FOR HIERARCHICAL ------------------ VVVVVVVVVVVVVVVVVVVVVVVVVVVV ----------- XXXXX
+			for (var k = 0; k < hierTileTypes.length; k++){
+				for (var i = 0; i < Rows[WhichDepMat]; i++){
+					if (HierTotals[WhichDepMat][k][i][Types] == 0)
+                HierTotals[WhichDepMat][k][i][Types]++;	//if total=0, add 1 to prevent division by 0
+            for (var j = 0; j < Types; j++){
+            	HierProbabilities[WhichDepMat][k][i][j] = HierTotals[WhichDepMat][k][i][j] / HierTotals[WhichDepMat][k][i][Types];   
+            }              
         }
     }
 
+}else{
 
 
-    /*
-    for(var i = 0; i < Probabilities[WhichDepMat].length; i++){ // SHOW PROPABILITIES MATRICES IN THE TEXT OUTPUT
-    	createNewParagraph(Probabilities[WhichDepMat][i]);
+	for (var i = 0; i < Totals[WhichDepMat].length; i++){
+		for (var j = 0; j < Totals[WhichDepMat][0].length - 1; j++){
+            //if there is a 0 in the totals column, replace it with a one to avoid div. by 0
+            if (Totals[WhichDepMat][i][Types] == 0){
+            	Totals[WhichDepMat][i][Types]++;
+            }
+            
+            Probabilities[WhichDepMat][i][j] = Totals[WhichDepMat][i][j] / Totals[WhichDepMat][i][Types];
+        }
     }
-    createNewParagraph("-----------------------------------------------");
-    */
-    
+}
+
+
+
+/*
+for(var i = 0; i < Probabilities[WhichDepMat].length; i++){ // SHOW PROPABILITIES MATRICES IN THE TEXT OUTPUT
+	createNewParagraph(Probabilities[WhichDepMat][i]);
+}
+createNewParagraph("-----------------------------------------------");
+*/
+
 }
 
 
@@ -466,272 +578,274 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 		var i = 0;
 		var Tmp = [];
 
-				while(i < TotalsFile * NumberOfRowSplits){ // size of Total MATRIX
-					Tmp.push(T);
-					i++;
-					index++;
-					if(index == numTypes + 1){
-						index = 0;
-						Totals[WhichDepMat].push(Tmp);
-						Tmp = [];
-					}
+			while(i < TotalsFile * NumberOfRowSplits){ // size of Total MATRIX
+				Tmp.push(T);
+				i++;
+				index++;
+				if(index == numTypes + 1){
+					index = 0;
+					Totals[WhichDepMat].push(Tmp);
+					Tmp = [];
+				}
+			}
+		}
+
+
+
+		var MapVec = [];
+		var TempVec = [];
+		var InputMapSize; 
+		var line = "";
+		var m;
+		var aux = '';
+		var indexTemp = 0;
+
+
+		for(var maps = 0; maps < numberOfTrainingMaps; maps++){
+			InputMapSize = fileContent[maps].length;
+			MapVec.push([]); // Vetor inteiro
+			
+
+
+			for(m = 0; m < InputMapSize; m++){
+				var char = fileContent[maps][m];
+
+				if(char == '\n' ||  char == '\t'){
+					
+
+					MapVec[0].push(TempVec); //parte de vetores
+					indexTemp = 0;
+					TempVec = [];
+
+
+
+				}else{
+					TempVec[indexTemp] = char;
+					indexTemp++;
 				}
 			}
 
 
 
-			var MapVec = [];
-			var TempVec = [];
-			var InputMapSize; 
-			var line = "";
-			var m;
-			var aux = '';
-			var indexTemp = 0;
+			var ID;
+			var P;
+			var id;
+			var rowsPerSplit = Math.floor(MapVec[0].length / NumberOfRowSplits);
 
 
-			for(var maps = 0; maps < numberOfTrainingMaps; maps++){
-				InputMapSize = fileContent[maps].length;
-				MapVec.push([]); // Vetor inteiro
-				
+			if(rowsPerSplit == 0){
+				rowsPerSplit =1;
+			}
 
 
-				for(m = 0; m < InputMapSize; m++){
-					var char = fileContent[maps][m];
+			for (var h = MapVec[0].length - 1; h >= 0; h--){
+			//alert(Math.floor(h/(Math.floor(MapVec[maps].length / 5))))
 
-					if(char == '\n' ||  char == '\t'){
-						
-
-						MapVec[0].push(TempVec); //parte de vetores
-						indexTemp = 0;
-						TempVec = [];
-
-
-
-					}else{
-						TempVec[indexTemp] = char;
-						indexTemp++;
-					}
-				}
-				var ID;
-				var P;
-				var id;
-				var rowsPerSplit = Math.floor(MapVec[0].length / NumberOfRowSplits);
+			var currRow = Math.floor(h/rowsPerSplit);
+			
+			if(currRow >= NumberOfRowSplits){
+				currRow = NumberOfRowSplits - 1;
+			}
+			
+			
+			
+			for (var w = 0; w < MapVec[0][h].length; w++){
 
 
-				if(rowsPerSplit == 0){
-					rowsPerSplit =1;
-				}
-
-
-				for (var h = MapVec[0].length - 1; h >= 0; h--){
-				//alert(Math.floor(h/(Math.floor(MapVec[maps].length / 5))))
-
-				var currRow = Math.floor(h/rowsPerSplit);
-				
-				if(currRow >= NumberOfRowSplits){
-					currRow = NumberOfRowSplits - 1;
-				}
+				ID = 0;
+				id = -1;
+				P = 0;
 				
 				
-				
-				for (var w = 0; w < MapVec[0][h].length; w++){
+				for (var i = 0; i < DependencyMatrices[WhichDepMat].length; i++){
+					for (var j =0; j < DependencyMatrices[WhichDepMat][i].length; j++){
 
 
-					ID = 0;
-					id = -1;
-					P = 0;
-					
-					
-					for (var i = 0; i < DependencyMatrices[WhichDepMat].length; i++){
-						for (var j =0; j < DependencyMatrices[WhichDepMat][i].length; j++){
-
-
-							if (DependencyMatrices[WhichDepMat][i][j] == 1){
-								
-
-								if (((h + i - 2) < 0) ||  ((h + i - 2) >= MapVec[0].length)  || ((w + j - 2) < 0)){
-
-									id=start;
-
-								}else{
-
-									for(var m = 0; m < numTypes; m++){
-
-										if(tilesVec[m] == MapVec[0][h + i - 2][w + j - 2]){
-
-											id = m;
-											break;
-										}
-									}
-
-									ID += id * Math.pow(numTypes, P);
-									P++;
-
-
-								}
-							}							
-						}
-					}
-					
-					
-					for (var m = 0; m < numTypes; m++){
-						if (tilesVec[m] == MapVec[0][h][w]){
+						if (DependencyMatrices[WhichDepMat][i][j] == 1){
 							
-							id = m;
-							break;
-						}
+
+							if (((h + (i - 2)) < 0) ||  ((h + (i - 2)) >= MapVec[0].length)  || ((w + (j - 2)) < 0)){
+
+								id=start;
+
+							}else{
+
+								for(var m = 0; m < numTypes; m++){
+
+									if(tilesVec[m] == MapVec[0][h + i - 2][w + j - 2]){
+
+										id = m;
+										break;
+									}
+								}
+
+								ID += id * Math.pow(numTypes, P);
+								P++;
+
+
+							}
+						}							
 					}
-
-					
-					//createNewParagraph(ID);
-
-					Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][id]++;
-
-					Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][numTypes]++;
-
-
 				}
 				
-			}
+				
+				for (var m = 0; m < numTypes; m++){
+					if (tilesVec[m] == MapVec[0][h][w]){
+						
+						id = m;
+						break;
+					}
+				}
 
+				
+				//createNewParagraph(ID);
+
+				Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][id]++;
+
+				Totals[WhichDepMat][ID+ Rows[WhichDepMat] * currRow][numTypes]++;
+
+
+			}
+			
 		}
 
-			/*
-			for(var i = 0; i < Totals[WhichDepMat].length; i++){  //SHOW TOTALS MATRICES IN TEXT OUTPUT
-			
-			createNewParagraph(Totals[WhichDepMat][i]);
+	}
+
+		/*
+		for(var i = 0; i < Totals[WhichDepMat].length; i++){  //SHOW TOTALS MATRICES IN TEXT OUTPUT
 		
-			}
-			
-			createNewParagraph("---------------------------------------------------------");
-			*/
-
+		createNewParagraph(Totals[WhichDepMat][i]);
+	
 		}
+		
+		createNewParagraph("---------------------------------------------------------");
+		*/
 
-		function InitFiles(WhichDepMat){
+	}
 
-			TotalMatrix.push([]);
-			ProbMatrix.push([]);
+	function InitFiles(WhichDepMat){
 
-			HierTotalMatrix.push([]);
-			HierProbMatrix.push([]);
+		TotalMatrix.push([]);
+		ProbMatrix.push([]);
 
-			if(Hierarchical == false)
+		HierTotalMatrix.push([]);
+		HierProbMatrix.push([]);
+
+		if(Hierarchical == false)
+			for(var k = 0; k < NumberOfRowSplits; k++){
+
+				TotalMatrix[WhichDepMat].push([]);
+				ProbMatrix[WhichDepMat].push([]);
+
+				for (var i = 0; i < Rows[WhichDepMat]; i++){
+
+					TotalMatrix[WhichDepMat][k].push([]);
+					ProbMatrix[WhichDepMat][k].push([]);
+
+					for (var j = 0; j <= tileTypes.length; j++){
+						if(j < tileTypes.length){
+							ProbMatrix[WhichDepMat][k][i].push(0);
+						}
+						TotalMatrix[WhichDepMat][k][i].push(0);
+					}
+				}
+			}else{
 				for(var k = 0; k < NumberOfRowSplits; k++){
 
-					TotalMatrix[WhichDepMat].push([]);
-					ProbMatrix[WhichDepMat].push([]);
+					HierTotalMatrix[WhichDepMat].push([]);
+					HierProbMatrix[WhichDepMat].push([]);
 
 					for (var i = 0; i < Rows[WhichDepMat]; i++){
 
-						TotalMatrix[WhichDepMat][k].push([]);
-						ProbMatrix[WhichDepMat][k].push([]);
+						HierTotalMatrix[WhichDepMat][k].push([]);
+						HierProbMatrix[WhichDepMat][k].push([]);
 
-						for (var j = 0; j <= tileTypes.length; j++){
-							if(j < tileTypes.length){
-								ProbMatrix[WhichDepMat][k][i].push(0);
+						for (var j = 0; j <= hierTileTypes.length; j++){
+							if(j < hierTileTypes.length){
+								HierProbMatrix[WhichDepMat][k][i].push(0);
 							}
-							TotalMatrix[WhichDepMat][k][i].push(0);
-						}
-					}
-				}else{
-					for(var k = 0; k < NumberOfRowSplits; k++){
-
-						HierTotalMatrix[WhichDepMat].push([]);
-						HierProbMatrix[WhichDepMat].push([]);
-
-						for (var i = 0; i < Rows[WhichDepMat]; i++){
-
-							HierTotalMatrix[WhichDepMat][k].push([]);
-							HierProbMatrix[WhichDepMat][k].push([]);
-
-							for (var j = 0; j <= hierTileTypes.length; j++){
-								if(j < hierTileTypes.length){
-									HierProbMatrix[WhichDepMat][k][i].push(0);
-								}
-								HierTotalMatrix[WhichDepMat][k][i].push(0);
-							}
+							HierTotalMatrix[WhichDepMat][k][i].push(0);
 						}
 					}
 				}
-
-
-				//document.getElementById("textOutputTab").innerHTML = TotalMatrix;
 			}
 
-			function SetRows(){
-				var types = 0;
 
-				if(Hierarchical == true){
-					types = hierTileTypes.length;
-				}else{
-					types = tileTypes.length;
-				}
-
-				for (var i = 0; i < NumberMatrices; i++){
-					Rows.push(1);
-					for (var j = 0; j < DepComplexities[i]; j++)
-						Rows[i] *= types;
-
-				}
-
-			//document.getElementById("textOutputTab").innerHTML = Rows;
+			//document.getElementById("textOutputTab").innerHTML = TotalMatrix;
 		}
-		
-		function SetDepMatrix(DepMatrix){
 
-			var TempDepMat = [[],[],[],[],[]];
-			for (var i = 0; i < 5; i++)
-				TempDepMat[i].length = 3;
+		function SetRows(){
+			var types = 0;
 
-	for (var i = 0; i < 5; i++){			//initialize array to all 0's
-		for (var j = 0; j < 3; j++)
-			TempDepMat[i][j] = 0;
+			if(Hierarchical == true){
+				types = hierTileTypes.length;
+			}else{
+				types = tileTypes.length;
+			}
+
+			for (var i = 0; i < NumberMatrices; i++){
+				Rows.push(1);
+				for (var j = 0; j < DepComplexities[i]; j++)
+					Rows[i] *= types;
+
+			}
+
+		//document.getElementById("textOutputTab").innerHTML = Rows;
 	}
-	TempDepMat[2][2] = 2;				//block we are finding the probability for
 	
-	if (TopDown == true){				//if we are generating from the top down...	
-		if (DepMatrix == 1)				//use the previous block to determine probability
-			TempDepMat[2][1] = 1;
-		else if (DepMatrix == 2){		//use the previous block and the block above to determine probability
-			TempDepMat[2][1] = 1;	//previous
-			TempDepMat[1][2] = 1;	//above
-		} else if (DepMatrix == 3){		//use previous block, and previous above block, and above block to determine probability
-			TempDepMat[2][1] = 1;	//previous
-			TempDepMat[1][1] = 1;	//previous above
-			TempDepMat[1][2] = 1;	//above
-		} 						
-	}else{					//if we are generating from the bottom up
-		
-		if (DepMatrix == 1)			//only use the previous block to determine probability
-			TempDepMat[2][1] = 1;
-        else if (DepMatrix == 2){		//use the previous block and the block below to determine probability
-			TempDepMat[2][1] = 1;	//previous
-			TempDepMat[3][2] = 1;	//below
-		} else if (DepMatrix == 3){		//use previous block, and previous below block, and below block to determine probability
-			TempDepMat[2][1] = 1;	//previous
-			TempDepMat[3][1] = 1;	//previous below
-			TempDepMat[3][2] = 1;	//below
-		}
+	function SetDepMatrix(DepMatrix){
+
+		var TempDepMat = [[],[],[],[],[]];
+		for (var i = 0; i < 5; i++)
+			TempDepMat[i].length = 3;
+
+for (var i = 0; i < 5; i++){			//initialize array to all 0's
+	for (var j = 0; j < 3; j++)
+		TempDepMat[i][j] = 0;
+}
+TempDepMat[2][2] = 2;				//block we are finding the probability for
+
+if (TopDown == true){				//if we are generating from the top down...	
+	if (DepMatrix == 1)				//use the previous block to determine probability
+		TempDepMat[2][1] = 1;
+	else if (DepMatrix == 2){		//use the previous block and the block above to determine probability
+		TempDepMat[2][1] = 1;	//previous
+		TempDepMat[1][2] = 1;	//above
+	} else if (DepMatrix == 3){		//use previous block, and previous above block, and above block to determine probability
+		TempDepMat[2][1] = 1;	//previous
+		TempDepMat[1][1] = 1;	//previous above
+		TempDepMat[1][2] = 1;	//above
+	} 						
+}else{					//if we are generating from the bottom up
+	
+	if (DepMatrix == 1)			//only use the previous block to determine probability
+		TempDepMat[2][1] = 1;
+    else if (DepMatrix == 2){		//use the previous block and the block below to determine probability
+		TempDepMat[2][1] = 1;	//previous
+		TempDepMat[3][2] = 1;	//below
+	} else if (DepMatrix == 3){		//use previous block, and previous below block, and below block to determine probability
+		TempDepMat[2][1] = 1;	//previous
+		TempDepMat[3][1] = 1;	//previous below
+		TempDepMat[3][2] = 1;	//below
 	}
+}
 
-	NumberMatrices++;
-	DependencyMatrices.push(TempDepMat);
-
-
-	
-
-	if(DepMatrix == 0)
-		DepComplexities.push(0);
-	else if(DepMatrix == 1)
-		DepComplexities.push(1);
-	else if(DepMatrix == 2)
-		DepComplexities.push(2);
-	else if(DepMatrix == 3)
-		DepComplexities.push(3);
+NumberMatrices++;
+DependencyMatrices.push(TempDepMat);
 
 
-//document.getElementById("textOutputTab").innerHTML = DependencyMatrices;
+
+
+if(DepMatrix == 0)
+	DepComplexities.push(0);
+else if(DepMatrix == 1)
+	DepComplexities.push(1);
+else if(DepMatrix == 2)
+	DepComplexities.push(2);
+else if(DepMatrix == 3)
+	DepComplexities.push(3);
+
+
 
 }
 
@@ -769,56 +883,56 @@ function FindTilesTypes(fileNumber){
 
 	}
 
-			//document.getElementById("textOutputTab").innerHTML = fileContent[0];
-			//document.getElementById("textOutputTab").innerHTML = tileTypes;
+		//document.getElementById("textOutputTab").innerHTML = fileContent[0];
+		//document.getElementById("textOutputTab").innerHTML = tileTypes;
+	}
+
+	function samplesGenerated(){
+
+		
+
+
+
+		//alert(fileContent);
+		//tileTypes.indexOf("a");
+
+
+		var networkStructure = document.getElementById("newtworkStructure").value;
+
+		Hierarchical = HMdMC;
+
+		NumberOfRowSplits = document.getElementById("rowSplits").value;
+
+		for(var i = 0; i < fileContent.length; i++){
+			FindTilesTypes(i);
 		}
 
-		function samplesGenerated(){
-
-			
-
-
-
-			//alert(fileContent);
-			//tileTypes.indexOf("a");
-
-
-			var networkStructure = document.getElementById("newtworkStructure").value;
-
-			Hierarchical = HMdMC;
-
-			NumberOfRowSplits = document.getElementById("rowSplits").value;
-
-			for(var i = 0; i < fileContent.length; i++){
-				FindTilesTypes(i);
-			}
-
-			for(var i = networkStructure; i >= 0; i--){
-				SetDepMatrix(i);
-			}
-			
-			
-			SetRows();
-			ResizeVectors();	
+		for(var i = networkStructure; i >= 0; i--){
+			SetDepMatrix(i);
+		}
+		
+		
+		SetRows();
+		ResizeVectors();	
 
 
 
-			for(var i = 0; i < NumberMatrices; i++){
-				InitFiles(i);
-			}
+		for(var i = 0; i < NumberMatrices; i++){
+			InitFiles(i);
+		}
 
 
-			for(var dep = 0; dep < NumberMatrices; dep++){
-				SetTotalsTopLevel(dep,fileContent.length) //depth, trainingMaps
-			}
+		for(var dep = 0; dep < NumberMatrices; dep++){
+			SetTotalsTopLevel(dep,fileContent.length) //depth, trainingMaps
+		}
 
-			for(var dep = 0; dep < NumberMatrices; dep++){
-				SetProbsForOnlyLowLevel(dep) //depth
-			}
+		for(var dep = 0; dep < NumberMatrices; dep++){
+			SetProbsForOnlyLowLevel(dep) //depth
+		}
 
-			
+		
 
-			GenerateTopLevel();
+		GenerateTopLevel();
 /*
 
 */
@@ -842,46 +956,115 @@ function createNewParagraph(string) {
 
 function createNewImage(game, tile) {
 
-	if(game == "mario"){
 	var img=document.createElement("img");
-
 	if(tile == "space"){
 		var newParagraph = document.createElement('div');
 		newParagraph.id = "space";
 		document.getElementById("graphicOutputTab").appendChild(newParagraph);
-	}		
-	else if (tile == "#"){
-		img.src="Images_Mario/G.png";
+	}	
+
+	if(game == "mario"){
+
+		
+		if (tile == "#"){
+			img.src="Images_Mario/G.png";
+		}
+		else if (tile == "p"){
+			img.src="Images_Mario/P.png";
+		}
+		else if (tile == "P"){
+			img.src="Images_Mario/P2.png";
+		}
+		else if (tile == "B"){
+			img.src="Images_Mario/B.png";
+		}
+		else if (tile == "?"){
+			img.src="Images_Mario/B2.png";
+		}
+		else if (tile == "#2"){
+			img.src="Images_Mario/G2.png";
+		}
+		else if (tile == "-"){
+			img.src="Images_Mario/E.png";
+		}
+		else if (tile == "PT"){
+			img.src="Images_Mario/PT.png";
+		}
+		else if (tile == "PT2"){
+			img.src="Images_Mario/PT2.png";
+		}else{
+			img.src="Images_Mario/E.png";
+		}
+
 	}
-	else if (tile == "p"){
-		img.src="Images_Mario/P.png";
-	}
-	else if (tile == "P"){
-		img.src="Images_Mario/P2.png";
-	}
-	else if (tile == "B"){
-		img.src="Images_Mario/B.png";
-	}
-	else if (tile == "?"){
-		img.src="Images_Mario/B2.png";
-	}
-	else if (tile == "#2"){
-		img.src="Images_Mario/G2.png";
-	}
-	else if (tile == "-"){
-		img.src="Images_Mario/E.png";
-	}else{
-		img.src="Images_Mario/E.png";
-	}
+	else if (game == "loderunner"){
 
 
-	
+		if (tile == "b"){
+			img.src="Images_Loderunner/F.png";
+		}
+		else if (tile == "#"){
+			img.src="Images_Loderunner/L.png";
+		}
+		else if (tile == "G"){
+			img.src="Images_Loderunner/G.png";
+		}
+		else if (tile == "E"){
+			img.src="Images_Loderunner/EN.png";
+		}
+		else if (tile == "-"){
+			img.src="Images_Loderunner/P.png";
+		}
+		else if (tile == "."){
+			img.src="Images_Loderunner/E.png";
+		}
+		else{
+			img.src="Images_Loderunner/E.png";
+		}
+	}
+	else if (game == "kidIcarus"){
+		if (tile == "D"){
+			img.src="Images_Kid_Icarus/D.png";
+		}
+		else if (tile == "D2"){
+			img.src="Images_Kid_Icarus/D2.png";
+		}
+		else if (tile == "DB"){
+			img.src="Images_Kid_Icarus/DB.png";
+		}
+		else if (tile == "DB2"){
+			img.src="Images_Kid_Icarus/DB2.png";
+		}
+		else if (tile == "DT"){
+			img.src="Images_Kid_Icarus/DT.png";
+		}
+		else if (tile == "DT2"){
+			img.src="Images_Kid_Icarus/DT2.png";
+		}
+		else if (tile == "-"){
+			img.src="Images_Kid_Icarus/E.png";
+		}
+		else if (tile == "#"){
+			img.src="Images_Kid_Icarus/F.png";
+		}
+		else if (tile == "F2"){
+			img.src="Images_Kid_Icarus/F2.png";
+		}
+		else if (tile == "F3"){
+			img.src="Images_Kid_Icarus/F3.png";
+		}
+		else if (tile == "M"){
+			img.src="Images_Kid_Icarus/P.png";
+		}
+		else{
+			img.src="Images_Kid_Icarus/E.png";
+		}
+	}
+
 
 	img.id="picture";
 	var foo = document.getElementById("graphicOutputTab");
 	foo.appendChild(img);
-
-}
 }
 
 
@@ -927,6 +1110,7 @@ function ResizeVectors(){
 
 function MdMCExperiments(){
 
+	gameName = document.getElementById("formChooseAGame").value;
 	var trainingFolderNameValue = document.getElementById("fileinput").value;
 	var rowSplitsValue = document.getElementById("rowSplits").value;
 	var lookaheadValue = document.getElementById("lookahead").value; 
@@ -942,177 +1126,203 @@ function MdMCExperiments(){
 
 	fileContent = [];
 
+
+
 	if(userYourOwnMapsRadio.checked == false){
 
 
+		if(gameName == "kidIcarus"){
+			jQuery.get('http://localhost/HMdMC/kidicarus.txt', function(data) {
+				fileContent.push(data);
+			});
+		}
+		else if (gameName == "loderunner"){
+			jQuery.get('http://localhost/HMdMC/loderunner.txt', function(data) {
+				fileContent.push(data);
+			});
+		}
+		else if (gameName == "superMarioBros"){
+			jQuery.get('http://localhost/HMdMC/mario_2.txt', function(data) {
+				fileContent.push(data);
+			});
+		}
 
-		jQuery.get('http://localhost/HMdMC/foo.txt', function(data) {
-			fileContent.push(data);
 
-					/*Show MAP
-					var aux = "";
-					for(var i = 0; i < fileContent[0].length; i++){
-						aux += fileContent[0][i];
-						if(fileContent[0][i] == '\n'){
-							createNewParagraph(aux);
-							aux = "";
-						}
-					}
-					*/
-				});
 
 /*
-			jQuery.get('http://localhost/HMdMC/mario_3.txt', function(data) {
-				fileContent.push(data);
-					
-				});
-				*/
-
-				//CAPTAR LETRAS
-
-			}else{
-
-				//var file = document.getElementById("fileinput").files[0];
+		jQuery.get('http://localhost/HMdMC/mario_3.txt', function(data) {
+			fileContent.push(data);
 				
-				if (file) {
-					var reader = new FileReader();
-					reader.readAsText(file, "UTF-8");
-					reader.onload = function (evt) {
-						fileContent[0] = evt.target.result;
+			});
+			*/
 
-					}
-					reader.onerror = function (evt) {
-						fileContent[0] = "Fail to Load File!"
-					}
+			//CAPTAR LETRAS
 
+		}else{
+
+			var file = document.getElementById("fileinput").files[0];
+			
+			if (file) {
+				var reader = new FileReader();
+				reader.readAsText(file, "UTF-8");
+				reader.onload = function (evt) {
+					fileContent[0] = evt.target.result;
+
+				}
+				reader.onerror = function (evt) {
+					fileContent[0] = "Fail to Load File!"
 				}
 
 			}
+
+		}
+		
+	}
+
+	//--------------------- SITE FUNCTIONS -------------------------------------------
+
+	function gameChanged(selectedValue){
+		choseGame = selectedValue;
+		if(selectedValue == "other"){
+			document.getElementById("defaultMaps").disabled = true;
+			document.getElementById("userYourOwnMapsRadio").checked = true;
+			document.getElementById("fileinput").disabled = false;
+		}else{
+			document.getElementById("defaultMaps").disabled = false;
 			
 		}
 
-		//--------------------- SITE FUNCTIONS -------------------------------------------
 
-		function gameChanged(selectedValue){
-			choseGame = selectedValue;
-			if(selectedValue == "other"){
-				document.getElementById("defaultMaps").disabled = true;
-				document.getElementById("userYourOwnMapsRadio").checked = true;
-				document.getElementById("fileinput").disabled = false;
-			}else{
-				document.getElementById("defaultMaps").disabled = false;
-				
-			}
+		if(selectedValue == "loderunner"){
+			document.getElementById("rowSplits").value = 12;
+			document.getElementById("height").value = 22;
+			document.getElementById("width").value = 32;
+			document.getElementById("newtworkStructure").value = 3;
 		}
 
-		function changeToMRF(){
-			var rowSplits = document.getElementById("rowSplits"); 
-			var lookahead = document.getElementById("lookahead");
-			var numberOfClusters = document.getElementById("numberOfClusters");
-			var distanceMetric = document.getElementById("distanceMetric");
-			var tileSize = document.getElementById("tileSize");
-			var manualRadio = document.getElementById("manualRadio");
-			var parameters = document.getElementById("parameters");
-			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
-			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
-			var newtworkStructure = document.getElementById("newtworkStructure");
-
-			rowSplits.disabled = true;
-			lookahead.disabled = true;
-			numberOfClusters.disabled = true;
-			distanceMetric.disabled = true;
-			tileSize.disabled = true;
-			manualRadio.disabled = true;
-			parameters.disabled = true;
-			clusteringBasedRadio.disabled = true;
-			formHighLevelConvertion.disabled = true;
-			newtworkStructure.disabled = true;
-
-			MdMC = false;
-			HMdMC = false;
-			MRF = true;
-
+		else if(selectedValue == "superMarioBros"){
+			document.getElementById("rowSplits").value = 12;
+			document.getElementById("height").value = 12;
+			document.getElementById("width").value = 210;
+			document.getElementById("newtworkStructure").value = 2;
 		}
 
-		function changeToMdMC(){
-			var rowSplits = document.getElementById("rowSplits"); 
-			var lookahead = document.getElementById("lookahead");
-			var numberOfClusters = document.getElementById("numberOfClusters");
-			var distanceMetric = document.getElementById("distanceMetric");
-			var tileSize = document.getElementById("tileSize");
-			var manualRadio = document.getElementById("manualRadio");
-			var parameters = document.getElementById("parameters");
-			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
-			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
-			var newtworkStructure = document.getElementById("newtworkStructure");
-
-			rowSplits.disabled = false;
-			lookahead.disabled = false;
-			numberOfClusters.disabled = true;
-			distanceMetric.disabled = true;
-			tileSize.disabled = true;
-			manualRadio.disabled = true;
-			parameters.disabled = true;
-			clusteringBasedRadio.disabled = true;
-			formHighLevelConvertion.disabled = true;
-			newtworkStructure.disabled = false;
-
-			MdMC = true;
-			HMdMC = false;
-			MRF = false;
-
+		else if(selectedValue == "kidIcarus"){
+			document.getElementById("rowSplits").value = 12;
+			document.getElementById("height").value = 173;
+			document.getElementById("width").value = 16;
+			document.getElementById("newtworkStructure").value = 3;
 		}
+	}
 
-		function changeToHMdMC(){
-			var rowSplits = document.getElementById("rowSplits"); 
-			var lookahead = document.getElementById("lookahead");
-			var numberOfClusters = document.getElementById("numberOfClusters");
-			var distanceMetric = document.getElementById("distanceMetric");
-			var tileSize = document.getElementById("tileSize");
-			var manualRadio = document.getElementById("manualRadio");
-			var parameters = document.getElementById("parameters");
-			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
-			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
-			var newtworkStructure = document.getElementById("newtworkStructure");
+	function changeToMRF(){
+		var rowSplits = document.getElementById("rowSplits"); 
+		var lookahead = document.getElementById("lookahead");
+		var numberOfClusters = document.getElementById("numberOfClusters");
+		var distanceMetric = document.getElementById("distanceMetric");
+		var tileSize = document.getElementById("tileSize");
+		var manualRadio = document.getElementById("manualRadio");
+		var parameters = document.getElementById("parameters");
+		var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+		var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+		var newtworkStructure = document.getElementById("newtworkStructure");
 
-			rowSplits.disabled = false;
-			lookahead.disabled = false;
-			numberOfClusters.disabled = false;
-			distanceMetric.disabled = false;
-			tileSize.disabled = false;
-			manualRadio.disabled = false;
+		rowSplits.disabled = true;
+		lookahead.disabled = true;
+		numberOfClusters.disabled = true;
+		distanceMetric.disabled = true;
+		tileSize.disabled = true;
+		manualRadio.disabled = true;
+		parameters.disabled = true;
+		clusteringBasedRadio.disabled = true;
+		formHighLevelConvertion.disabled = true;
+		newtworkStructure.disabled = true;
+
+		MdMC = false;
+		HMdMC = false;
+		MRF = true;
+
+	}
+
+	function changeToMdMC(){
+		var rowSplits = document.getElementById("rowSplits"); 
+		var lookahead = document.getElementById("lookahead");
+		var numberOfClusters = document.getElementById("numberOfClusters");
+		var distanceMetric = document.getElementById("distanceMetric");
+		var tileSize = document.getElementById("tileSize");
+		var manualRadio = document.getElementById("manualRadio");
+		var parameters = document.getElementById("parameters");
+		var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+		var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+		var newtworkStructure = document.getElementById("newtworkStructure");
+
+		rowSplits.disabled = false;
+		lookahead.disabled = true;
+		numberOfClusters.disabled = true;
+		distanceMetric.disabled = true;
+		tileSize.disabled = true;
+		manualRadio.disabled = true;
+		parameters.disabled = true;
+		clusteringBasedRadio.disabled = true;
+		formHighLevelConvertion.disabled = true;
+		newtworkStructure.disabled = false;
+
+		MdMC = true;
+		HMdMC = false;
+		MRF = false;
+
+	}
+
+	function changeToHMdMC(){
+		var rowSplits = document.getElementById("rowSplits"); 
+		var lookahead = document.getElementById("lookahead");
+		var numberOfClusters = document.getElementById("numberOfClusters");
+		var distanceMetric = document.getElementById("distanceMetric");
+		var tileSize = document.getElementById("tileSize");
+		var manualRadio = document.getElementById("manualRadio");
+		var parameters = document.getElementById("parameters");
+		var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+		var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+		var newtworkStructure = document.getElementById("newtworkStructure");
+
+		rowSplits.disabled = false;
+		lookahead.disabled = true;
+		numberOfClusters.disabled = false;
+		distanceMetric.disabled = false;
+		tileSize.disabled = false;
+		manualRadio.disabled = false;
+		parameters.disabled = false;
+		clusteringBasedRadio.disabled = false;
+		formHighLevelConvertion.disabled = true;
+		newtworkStructure.disabled = false;
+
+		manualRadio.checked = true;
+		clusteringBasedRadio.checked = false;
+
+		MdMC = false;
+		HMdMC = true;
+		MRF = false;
+
+	}
+
+	function changeHighLevelMapsConvertion(){
+		var manualRadio = document.getElementById("manualRadio");
+		var parameters = document.getElementById("parameters");
+		var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
+		var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+
+		if(parameters.disabled == true){
 			parameters.disabled = false;
-			clusteringBasedRadio.disabled = false;
 			formHighLevelConvertion.disabled = true;
-			newtworkStructure.disabled = false;
-
-			manualRadio.checked = true;
-			clusteringBasedRadio.checked = false;
-
-			MdMC = false;
-			HMdMC = true;
-			MRF = false;
-
+		}
+		else{
+			parameters.disabled = true;
+			formHighLevelConvertion.disabled = false;
 		}
 
-		function changeHighLevelMapsConvertion(){
-			var manualRadio = document.getElementById("manualRadio");
-			var parameters = document.getElementById("parameters");
-			var	clusteringBasedRadio = document.getElementById("clusteringBasedRadio");
-			var formHighLevelConvertion = document.getElementById("formHighLevelConvertion");
+	}
 
-			if(parameters.disabled == true){
-				parameters.disabled = false;
-				formHighLevelConvertion.disabled = true;
-			}
-			else{
-				parameters.disabled = true;
-				formHighLevelConvertion.disabled = false;
-			}
-
-		}
-
-	</script>
+</script>
 
 </script>
 
@@ -1152,9 +1362,10 @@ function MdMCExperiments(){
 						<legend class="scheduler-border">Choose a Game</legend>
 
 						<select class="form-control" id="formChooseAGame" onchange="gameChanged(this.value)">
-							<option value="kidIcarus" >Kid Icarus</option>
-							<option value="lorerunner">Loderunner</option>
+
 							<option value="superMarioBros">Super Mario Bros</option>
+							<option value="loderunner">Loderunner</option>
+							<option value="kidIcarus" >Kid Icarus</option>
 							<option value="other">Other</option>
 						</select>
 
@@ -1216,7 +1427,7 @@ function MdMCExperiments(){
 							<br>
 							<div class="input-group">
 								<span class="input-group-addon" >Lookahead&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
-								<input type="text" class="form-control"  aria-describedby="lookahead" id="lookahead" value = "1">
+								<input type="text" class="form-control"  aria-describedby="lookahead" id="lookahead" value = "0" disabled = true>
 							</div>
 							<br>	
 							<div class="input-group">
@@ -1307,9 +1518,7 @@ function MdMCExperiments(){
 					<div id="textOutputTab">
 
 					</div>
-					<div id="divButtons2">
-						<button type="button" class="btn btn-primary btn-block" id="saveText" disabled = true>Save Text Output</button>
-					</div>
+					
 
 				</div>
 				<div id="menu2" class="tab-pane fade"  >
@@ -1317,9 +1526,7 @@ function MdMCExperiments(){
 					<div id="graphicOutputTab">
 
 					</div>
-					<div id="divButtons2">
-						<button type="button" class="btn btn-primary btn-block" id="saveGraphic" disabled = true>Save Graphic Output</button>
-					</div>
+					
 
 				</div>
 			</div>

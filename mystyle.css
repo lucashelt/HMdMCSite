@@ -207,13 +207,13 @@ height: 480px;
 	width: 2222px;
 	float: left;
 	border:1px;
-border-style:solid;
-border-color:rgb(135,135,135);
+
 }
 
 #graphicOutputTab{
 
-	
+	margin-top:32px;
+	margin-left:40px;
 height: 2480px;
 	width: 6222px;
 
