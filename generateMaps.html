@@ -27,49 +27,49 @@
 
 	<script>
 
-		var numberOfMapsGenerated = 0; 
+	var numberOfMapsGenerated = 0; 
 
-		var choseGame;
-		var gameName;
+	var choseGame;
+	var gameName;
 
-		var MdMC = true;
-		var HMdMC = false;
-		var MRF = false;
+	var MdMC = true;
+	var HMdMC = false;
+	var MRF = false;
 
-		var fileContent = [];
-		var tileTypes = [];
-		var hierTileTypes = [];
-		var TopDown = false;
-		var NumberMatrices = 0;
-		var DependencyMatrices = [];
-		var DepComplexities = [];
-		var Hierarchical = false;
-		var Rows = [];
+	var fileContent = [];
+	var tileTypes = [];
+	var hierTileTypes = [];
+	var TopDown = false;
+	var NumberMatrices = 0;
+	var DependencyMatrices = [];
+	var DepComplexities = [];
+	var Hierarchical = false;
+	var Rows = [];
 
 
-		var Totals = [];
-		var Probabilities = [];
-		var HierTotals = [];
-		var HierProbabilities = [];
+	var Totals = [];
+	var Probabilities = [];
+	var HierTotals = [];
+	var HierProbabilities = [];
 
-		var TotalMatrix = [];
-		var ProbMatrix = [];
-		var HierTotalMatrix = [];
-		var HierProbMatrix = [];
-		var NumberOfRowSplits;
+	var TotalMatrix = [];
+	var ProbMatrix = [];
+	var HierTotalMatrix = [];
+	var HierProbMatrix = [];
+	var NumberOfRowSplits;
 
-		var MapGen = [];
-		var lookahead;
+	var MapGen = [];
+	var lookahead;
 
-		var mapHeight;
-		var mapWidth;
+	var mapHeight;
+	var mapWidth;
 
-		var BackTracks;
-		var badPipes;
-		var NumberTilesWithEachMatrix = [];
-		var start = 0;
+	var BackTracks;
+	var badPipes;
+	var NumberTilesWithEachMatrix = [];
+	var start = 0;
 
-		function GenerateTopLevelTile(PossibleTiles, h, w, offset, WhichDepMat, depth, method){
+	function GenerateTopLevelTile(PossibleTiles, h, w, offset, WhichDepMat, depth, method){
 
 
 
@@ -325,6 +325,7 @@ for(var i = 0; i < MapGen.length; i++){
 	for(var j = 0; j < MapGen[i].length;j++){
 		aux += MapGen[i][j];
 
+
 		char = MapGen[i][j];
 		
 		if(gameName == "superMarioBros"){
@@ -439,7 +440,9 @@ for(var i = 0; i < MapGen.length; i++){
 
 
 		if(j == MapGen[i].length- 1){
-			createNewImage("space","space");
+			if(gameName != "other"){
+				createNewImage("space","space");
+			}
 			createNewParagraph(aux,"textOutputTab");
 			aux = "";
 		}
@@ -458,44 +461,44 @@ createNewParagraph("[End]","graphicOutputTab");
 
 	//-------------- CLEAR VARIABLES ----------------------
 
-		choseGame = null;
-		 gameName = null;
+	choseGame = null;
+	gameName = null;
 
-		 fileContent = [];
-		 tileTypes = [];
-		 hierTileTypes = [];
-		 TopDown = false;
-		 NumberMatrices = 0;
-		 DependencyMatrices = [];
-		 DepComplexities = [];
-		 Hierarchical = false;
-		 Rows = [];
+	fileContent = [];
+	tileTypes = [];
+	hierTileTypes = [];
+	TopDown = false;
+	NumberMatrices = 0;
+	DependencyMatrices = [];
+	DepComplexities = [];
+	Hierarchical = false;
+	Rows = [];
 
 
-		 Totals = [];
-		 Probabilities = [];
-		 HierTotals = [];
-		 HierProbabilities = [];
+	Totals = [];
+	Probabilities = [];
+	HierTotals = [];
+	HierProbabilities = [];
 
-		 TotalMatrix = [];
-		 ProbMatrix = [];
-		 HierTotalMatrix = [];
-		 HierProbMatrix = [];
-		 NumberOfRowSplits;
+	TotalMatrix = [];
+	ProbMatrix = [];
+	HierTotalMatrix = [];
+	HierProbMatrix = [];
+	NumberOfRowSplits;
 
-		 MapGen = [];
-		 lookahead = null;
+	MapGen = [];
+	lookahead = null;
 
-		 mapHeight = null;
-		 mapWidth = null;
+	mapHeight = null;
+	mapWidth = null;
 
-		 BackTracks = null;
-		 badPipes = null;
-		 NumberTilesWithEachMatrix = [];
-		 start = 0;
+	BackTracks = null;
+	badPipes = null;
+	NumberTilesWithEachMatrix = [];
+	start = 0;
 
-		 	var samplingMapsButton = document.getElementById("samplingMapsButton");
-		samplingMapsButton.disabled = true;
+	var samplingMapsButton = document.getElementById("samplingMapsButton");
+	samplingMapsButton.disabled = true;
 
 }
 
@@ -1179,15 +1182,15 @@ function samplingReady(){
 	
 
 	if (ready){
-	var file = document.getElementById("fileinput").files[0];
-	if(file && userYourOwnMapsRadio.checked == true || userYourOwnMapsRadio.checked == false){
-		var samplingMapsButton = document.getElementById("samplingMapsButton");
-		samplingMapsButton.disabled = false;
-		MdMCExperiments();
-	}
-	else{
-		alert("Please choose Training Maps!");
-	}
+		var file = document.getElementById("fileinput").files[0];
+		if(file && userYourOwnMapsRadio.checked == true || userYourOwnMapsRadio.checked == false){
+			var samplingMapsButton = document.getElementById("samplingMapsButton");
+			samplingMapsButton.disabled = false;
+			MdMCExperiments();
+		}
+		else{
+			alert("Please choose Training Maps!");
+		}
 	}
 }
 
@@ -1251,7 +1254,7 @@ function MdMCExperiments(){
 			fileContent.push(data);
 				
 			});
-			*/
+*/
 
 			//CAPTAR LETRAS
 
@@ -1428,7 +1431,7 @@ function MdMCExperiments(){
 
 	}
 
-</script>
+	</script>
 
 </script>
 
@@ -1625,7 +1628,7 @@ function MdMCExperiments(){
 
 					</div>
 
-				
+					
 					
 
 				</div>
@@ -1636,7 +1639,7 @@ function MdMCExperiments(){
 					</div>
 					
 
-				
+					
 
 				</div>
 			</div>
