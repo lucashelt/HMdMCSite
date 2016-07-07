@@ -47,40 +47,19 @@
  <fieldset class="scheduler-border" id="howToUse">
     <legend class="scheduler-border">How to use</legend>
 	
-	<p> 1) Training: In order to train an MdMC, we first need
-to specify the network structure, ns, or the set of previous
-states upon which the current state depends (e.g., a chain
-where each tile depends only on the previous horizontal tile (a
-standard Markov chain), a chain where each tile depends on
-the previous horizontal tile as well as the previous vertical tile,
-or further complicated structures). Figure 4 shows the different
-network structures that we used in our experiments. Though
-more complicated structures could be devised, increasing the
-complexity of the network structure exponentially increases
-the number tile configurations possible, corresponding to the
-number of positions in the probability table that need to be estimated
-from the data. This results in a need for more training
-data to properly estimate the parameters of the MdMC </p>
+	<p> <strong>1)</strong> Choose the game of your preference; </p>
+	<p> <strong>2)</strong> Load your training map, or use the default ones. </p>
+	<p> <strong>3)</strong> Choose a method to generate maps. For while, we just have the MdMC method implemented. For doubts, information, or access to the C++ version of the code talk to <a href="https://sites.google.com/site/sampsnodgrass/"> Sam</a>;</p>
+	<p> <strong>4)</strong> Choose the height and width for the map that will be generated; </p>
+	<p> <strong>5)</strong> Set the configuration that best fit your needs in the Experimental Set-ups; </p>
+	<p> <strong>6)</strong> Click on Training Maps button; </p>
+	<p> <strong>7)</strong> Click on Sampling Maps button; </p>
+	<p> <strong>8)</strong> Click on Text Output, and Graphic Output tabs in order to see the generated maps. </p>
+	</br>
+	<p> P.S. if you are not generating a Super Mario, Loderunner, or Kid Icarus map it is not possible to see the Graphic Output. </p> 
 
-<p>2) Sampling: Sampling a map using a Markov random field
-requires a vastly different approach than our previous sampling
-algorithms, because MRFs are inherently not sequential. Our
-sampler implements the Metropolis-Hasting algorithm [14].
-For completeness, Algorithm 7 shows the algorithm applied
-to map generation. The algorithm starts by initializing a map
-with each tile chosen using the single tile distribution observed
-in the training maps (P0), corresponding to a network structure
-with no dependencies. Modifications are made to the map by
-choosing two positions in the map randomly, and swapping
-the tile types located there. The tile swap is accepted with
-probability equal to min(1, e
-log(Ppost )−log(Ppre )
-). The swapping
-procedure is repeated until each location in the map has
-been chosen b times, after which the map is returned. Unlike
-the previous models, our MRFs do not sample sequentially,
-and, thus, do not employ a lookahead nor fallback.
- </p>
+<p> <strong> For doubts, information, or access to the C++ version of the code, which has all the methods implemented, talk to <a href="https://sites.google.com/site/santiagoontanonvillar/"> Santiago</a>, or <a href="https://sites.google.com/site/sampsnodgrass/"> Sam</a></strong>.
+ 			</p>
 	
 </fieldset>
 	
@@ -88,24 +67,28 @@ and, thus, do not employ a lookahead nor fallback.
     <legend class="scheduler-border">Contacts</legend>
 	<div id = "info">
 	
-	<img src="images/circle.png" alt="person" id = "photo" href = "#">
-	<h4>Title: First Middle Last </h4>
+	<img src="images/santi.png" alt="person" id = "photo" href = "#">
+	<h4>Santiago Ontañón Villar </h4>
 	<p>  
-	 E-mail: email@drexel.edu </p>
+	 Santi[at]cs[dot]Drexel[dot]edu </p>
+	 <a href="https://sites.google.com/site/santiagoontanonvillar/">  
+	 Santiago's Website </a>
+	</div>
+	
+		<div id = "info">
+	<img src="images/sam.png" alt="person" id = "photo" href = "#">
+	<h4> Sam P Snodgrass </h4>
+	<p>   
+	 E-mail: Sps74[at]Drexel[dot]edu </p>
+	 <a href="https://sites.google.com/site/sampsnodgrass/">  
+	 Sam's Website </a>
 	</div>
 	
 		<div id = "info">
 	<img src="images/circle.png" alt="person" id = "photo" href = "#">
-	<h4> Title: First Middle Last </h4>
+	<h4> Lucas Francisco da Costa Helt </h4>
 	<p>   
-	 E-mail: email@drexel.edu </p>
-	</div>
-	
-		<div id = "info">
-	<img src="images/circle.png" alt="person" id = "photo" href = "#">
-	<h4> Title: First Middle Last </h4>
-	<p>   
-	 E-mail: email@drexel.edu </p>
+	 Ld555[at]Drexel[dot]edu </p>
 	</div>
 	</fieldset>
 	</div>

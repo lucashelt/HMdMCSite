@@ -1279,6 +1279,9 @@ function MdMCExperiments(){
 	//--------------------- SITE FUNCTIONS -------------------------------------------
 
 	function gameChanged(selectedValue){
+		
+		numberOfMapsGenerated = 0;
+
 		choseGame = selectedValue;
 		if(selectedValue == "other"){
 			document.getElementById("defaultMaps").disabled = true;
