@@ -941,8 +941,29 @@ function FindTilesTypes(fileNumber){
 	}
 
 	function samplesGenerated(){
+		var ready = true;
+		var count = 0;
+		var rowSplits = document.getElementById("rowSplits").value;
 
-		numberOfMapsGenerated++;
+		for(var i = 0; i < fileContent.length; i++){
+			for(var j = 0; j < fileContent[i].length; j++){
+				if(fileContent[i][j] == '\n' ||  fileContent[i][j]  == '\t'){
+					count++;
+				}
+			}
+			if(rowSplits > count){
+				ready = false;
+				alert("Number of Row Splits exceeds the number of provided map's rows!\nActual Row Splits: " + rowSplits + ".\nMap's rows: " + count +".");
+				document.getElementById("rowSplits").value = count;
+			}else{
+				count = 0;
+			}
+			
+		}
+
+
+		if(ready){
+			numberOfMapsGenerated++;
 
 
 
@@ -991,7 +1012,7 @@ function FindTilesTypes(fileNumber){
 */
 
 
-
+}
 
 }
 
@@ -1062,10 +1083,13 @@ function createNewImage(game, tile) {
 			img.src="Images_Loderunner/EN.png";
 		}
 		else if (tile == "-"){
-			img.src="Images_Loderunner/P.png";
+			img.src="Images_Loderunner/R.png";
 		}
 		else if (tile == "."){
 			img.src="Images_Loderunner/E.png";
+		}
+		else if (tile == "B"){
+			img.src="Images_Loderunner/B.png";
 		}
 		else{
 			img.src="Images_Loderunner/E.png";
@@ -1158,12 +1182,7 @@ function samplingReady(){
 		alert("Min Height: 12!");
 		document.getElementById("height").value = 12;
 	}
-	if(rowSplits > 12){
-		ready = false;
-		alert("Max Number of Row Splits: 12!");
-		document.getElementById("rowSplits").value = 12;
-	}
-
+	
 	if(rowSplits < 1){
 		ready = false;
 		alert("Min Number of Row Splits: 1!");
@@ -1299,7 +1318,7 @@ function MdMCExperiments(){
 		if(selectedValue == "loderunner"){
 			$('#textOutputTab').empty();
 			$('#graphicOutputTab').empty();
-			document.getElementById("rowSplits").value = 12;
+			document.getElementById("rowSplits").value = 22;
 			document.getElementById("height").value = 22;
 			document.getElementById("width").value = 32;
 			document.getElementById("networkStructure").value = 3;
@@ -1317,8 +1336,8 @@ function MdMCExperiments(){
 		else if(selectedValue == "kidIcarus"){
 			$('#textOutputTab').empty();
 			$('#graphicOutputTab').empty();
-			document.getElementById("rowSplits").value = 12;
-			document.getElementById("height").value = 173;
+			document.getElementById("rowSplits").value = 172;
+			document.getElementById("height").value = 172;
 			document.getElementById("width").value = 16;
 			document.getElementById("networkStructure").value = 3;
 		}
