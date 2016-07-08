@@ -252,27 +252,41 @@ margin-top:50px;
 
 
 #howToUse{
+	font-size: 13px;
+	margin-top:15px;
+	height: 430px;
+	width: 1222px;
+	float: left;
+	margin-left:40px;
+}
+
+#contacts{
 	
 	margin-top:15px;
-	height: 280px;
+	height: 140px;
 	width: 1222px;
 	float: left;
 	margin-left:40px;
 }
 
 #info{
-	font-size: 15px;
+	font-size: 12px;
 	text-align:center;
-	margin-top:5px;
-	height: 210px;
-	width: 340px;
 	float: left;
-	margin-left:40px;
+	margin-left: 5px;
+}
+
+#photoDiv{
+	
+	float: left;
+	margin-top: 10px;
+	margin-left: 85px;
 }
 
 #photo{
-	width:125px;height:125px;
+	width:60px;height:60px;
 }
+
 
 #divMapSize{
 	
