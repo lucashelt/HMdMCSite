@@ -90,7 +90,7 @@
 
 			//check if this state has been observed before
 			for (var k = 0; k < 5; k++){
-				for (var m = 2; m >= 0; m--){
+				for (var m = 0; m < 3; m++){
 					if (DependencyMatrices[method][k][m] == 1){
 						if (((h + (k - 2)) < 0) || ((h + (k - 2)) >= mapHeight) || ((w + (m - 2)) < 0))
 							type = start;
@@ -332,19 +332,48 @@ for(var i = 0; i < MapGen.length; i++){
 			
 			if(i < MapGen.length - 1 && char == "#"){
 				createNewImage("mario","#2");
+			}else if (char == "e"){
+				if(MapGen[i+1][j] != null){
+					if(MapGen[i+1][j] == "-"){
+						createNewImage("mario","EA");
+					}
+					else{
+						
+						var chooseOne = Math.floor((Math.random() * 2) + 1);
+						if(chooseOne == 1){
+createNewImage("mario","EF");
+						}else{
+							createNewImage("mario","EF2");
+						}
+						
+					}
+				}else{
+					createNewImage("mario","E");
+				}
+
 			}
 
 			else if (char == "p"){
-				if(MapGen[i-1][j] != "p"){
-					createNewImage("mario","PT");
+				if(MapGen[i-1][j] != null){
+					if(MapGen[i-1][j] != "p"){
+						createNewImage("mario","PT");
+					}
+					else{
+						createNewImage("mario",MapGen[i][j]);
+					}
 				}else{
-					createNewImage("mario",MapGen[i][j]);
+					createNewImage("mario","E");
 				}
 			}else if (char == "P"){
-				if(MapGen[i-1][j] != "P"){
-					createNewImage("mario","PT2");
+				if(MapGen[i-1][j] != null){
+					if(MapGen[i-1][j] != "P"){
+						createNewImage("mario","PT2");
+					}
+					else{
+						createNewImage("mario",MapGen[i][j]);
+					}
 				}else{
-					createNewImage("mario",MapGen[i][j]);
+					createNewImage("mario","E");
 				}
 			}
 
@@ -588,13 +617,12 @@ if(Hierarchical){
     }
 }
 
-
-
 /*
+createNewParagraph("P-----------------------------------------------","textOutputTab");
 for(var i = 0; i < Probabilities[WhichDepMat].length; i++){ // SHOW PROPABILITIES MATRICES IN THE TEXT OUTPUT
-	createNewParagraph(Probabilities[WhichDepMat][i]);
+	createNewParagraph(Probabilities[WhichDepMat][i],"textOutputTab");
 }
-createNewParagraph("-----------------------------------------------");
+createNewParagraph("P-----------------------------------------------","textOutputTab");
 */
 
 }
@@ -602,7 +630,6 @@ createNewParagraph("-----------------------------------------------");
 
 
 function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
-
 
 
 	var numTypes = -1;
@@ -622,6 +649,7 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 	}
 
 	var TotalsFile = TotalMatrix[WhichDepMat][0].length * TotalMatrix[WhichDepMat][0][0].length;			
+
 
 
 	if(Totals[WhichDepMat] == null){
@@ -700,17 +728,18 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 				currRow = NumberOfRowSplits - 1;
 			}
 			
-			
+
 			
 			for (var w = 0; w < MapVec[0][h].length; w++){
 
 
 				ID = 0;
-				id = -1;
+				id = 0;
 				P = 0;
 				
-				
 				for (var i = 0; i < DependencyMatrices[WhichDepMat].length; i++){
+
+
 					for (var j =0; j < DependencyMatrices[WhichDepMat][i].length; j++){
 
 
@@ -725,18 +754,14 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
 								for(var m = 0; m < numTypes; m++){
 
-									if(tilesVec[m] == MapVec[0][h + i - 2][w + j - 2]){
-
+									if(tilesVec[m] == MapVec[0][h + (i - 2)][w + (j - 2)]){
 										id = m;
 										break;
 									}
 								}
-
-								ID += id * Math.pow(numTypes, P);
-								P++;
-
-
 							}
+							ID += id * Math.pow(numTypes, P);
+							P++;
 						}							
 					}
 				}
@@ -761,22 +786,26 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 			}
 			
 		}
+		MapVec = [];
 
 	}
+	/*
+	createNewParagraph(tilesVec, "textOutputTab");
 
-		/*
+	createNewParagraph("T---------------------------------------------------------","textOutputTab");
 		for(var i = 0; i < Totals[WhichDepMat].length; i++){  //SHOW TOTALS MATRICES IN TEXT OUTPUT
-		
-		createNewParagraph(Totals[WhichDepMat][i]);
-	
+
+			createNewParagraph(Totals[WhichDepMat][i],"textOutputTab");
+
 		}
 		
-		createNewParagraph("---------------------------------------------------------");
+		createNewParagraph("T---------------------------------------------------------","textOutputTab");
 		*/
 
 	}
 
 	function InitFiles(WhichDepMat){
+
 
 		TotalMatrix.push([]);
 		ProbMatrix.push([]);
@@ -824,7 +853,8 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 			}
 
 
-			//document.getElementById("textOutputTab").innerHTML = TotalMatrix;
+			//createNewParagraph(TotalMatrix.length,"textOutputTab");
+
 		}
 
 		function SetRows(){
@@ -858,7 +888,7 @@ for (var i = 0; i < 5; i++){			//initialize array to all 0's
 }
 TempDepMat[2][2] = 2;				//block we are finding the probability for
 
-if (TopDown == true){				//if we are generating from the top down...	
+if (TopDown){				//if we are generating from the top down...	
 	if (DepMatrix == 1)				//use the previous block to determine probability
 		TempDepMat[2][1] = 1;
 	else if (DepMatrix == 2){		//use the previous block and the block above to determine probability
@@ -936,8 +966,8 @@ function FindTilesTypes(fileNumber){
 
 	}
 
-		//document.getElementById("textOutputTab").innerHTML = fileContent[0];
-		//document.getElementById("textOutputTab").innerHTML = tileTypes;
+		//createNewParagraph(tileTypes,"textOutputTab");
+		
 	}
 
 	function samplesGenerated(){
@@ -951,6 +981,12 @@ function FindTilesTypes(fileNumber){
 					count++;
 				}
 			}
+
+			if(fileContent[i][fileContent[i].length - 1] != '\n' || fileContent[i][fileContent[i].length - 1] != '\t'){
+				count++;
+				fileContent[i] += '\n';
+			}
+
 			if(rowSplits > count){
 				ready = false;
 				alert("Number of Row Splits exceeds the number of provided map's rows!\nActual Row Splits: " + rowSplits + ".\nMap's rows: " + count +".");
@@ -981,6 +1017,7 @@ function FindTilesTypes(fileNumber){
 			FindTilesTypes(i);
 		}
 
+
 		for(var i = networkStructure; i >= 0; i--){
 			SetDepMatrix(i);
 		}
@@ -996,6 +1033,7 @@ function FindTilesTypes(fileNumber){
 		}
 
 
+
 		for(var dep = 0; dep < NumberMatrices; dep++){
 			SetTotalsTopLevel(dep,fileContent.length) //depth, trainingMaps
 		}
@@ -1007,12 +1045,12 @@ function FindTilesTypes(fileNumber){
 		
 
 		GenerateTopLevel();
-/*
-
-*/
 
 
-}
+		
+
+
+	}
 
 }
 
@@ -1062,7 +1100,17 @@ function createNewImage(game, tile) {
 		}
 		else if (tile == "PT2"){
 			img.src="Images_Mario/PT2.png";
-		}else{
+		}else if (tile == "c"){
+			img.src="Images_Mario/C.png";
+		}else if (tile == "EF"){
+			img.src="Images_Mario/EF.png";
+		}else if (tile == "EA"){
+			img.src="Images_Mario/EA.png";
+		}
+		else if (tile == "EF2"){
+			img.src="Images_Mario/EF2.png";
+		}
+		else{
 			img.src="Images_Mario/E.png";
 		}
 
@@ -1251,29 +1299,33 @@ function MdMCExperiments(){
 
 
 		if(gameName == "kidIcarus"){
-			jQuery.get('kidicarus.txt', function(data) {
-				fileContent.push(data);
-			});
+			for (var i = 1; i <= 6; i++){
+				jQuery.get('KidIcarus_Maps/kidicarus_'+i+'.txt', function(data) {
+					fileContent.push(data);
+				});
+			}
 		}
 		else if (gameName == "loderunner"){
-			jQuery.get('loderunner.txt', function(data) {
-				fileContent.push(data);
-			});
+			for (var i = 1; i <= 150; i++){
+				jQuery.get('Loderunner_Maps/Level '+ i +'.txt', function(data) {
+					fileContent.push(data);
+				});
+			}
 		}
 		else if (gameName == "superMarioBros"){
-			jQuery.get('mario_2.txt', function(data) {
-				fileContent.push(data);
-			});
+			for (var i = 1; i <= 16; i++){
+				jQuery.get('Mario_Maps/mario_'+i+'.txt', function(data) {
+					fileContent.push(data);
+
+				});
+			}
 		}
+		//'Mario_Maps/mario_'+i+'.txt'
+
+		
 
 
 
-/*
-		jQuery.get('http://localhost/HMdMC/mario_3.txt', function(data) {
-			fileContent.push(data);
-				
-			});
-*/
 
 			//CAPTAR LETRAS
 
@@ -1330,14 +1382,14 @@ function MdMCExperiments(){
 			document.getElementById("rowSplits").value = 12;
 			document.getElementById("height").value = 12;
 			document.getElementById("width").value = 210;
-			document.getElementById("networkStructure").value = 2;
+			document.getElementById("networkStructure").value = 3;
 		}
 
 		else if(selectedValue == "kidIcarus"){
 			$('#textOutputTab').empty();
 			$('#graphicOutputTab').empty();
-			document.getElementById("rowSplits").value = 172;
-			document.getElementById("height").value = 172;
+			document.getElementById("rowSplits").value = 159;
+			document.getElementById("height").value = 159;
 			document.getElementById("width").value = 16;
 			document.getElementById("networkStructure").value = 3;
 		}
@@ -1558,7 +1610,7 @@ function MdMCExperiments(){
 							<br>	
 							<div class="input-group">
 								<span class="input-group-addon" >Network Structure&nbsp&nbsp</span>
-								<input type="text" class="form-control"  aria-describedby="networkStructure" id="networkStructure" value = "2">
+								<input type="text" class="form-control"  aria-describedby="networkStructure" id="networkStructure" value = "3">
 							</div>	
 
 						</div>
