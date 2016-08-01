@@ -27,49 +27,49 @@
 
 	<script>
 
-	var numberOfMapsGenerated = 0; 
+		var numberOfMapsGenerated = 0; 
 
-	var choseGame;
-	var gameName;
+		var choseGame;
+		var gameName;
 
-	var MdMC = true;
-	var HMdMC = false;
-	var MRF = false;
+		var MdMC = true;
+		var HMdMC = false;
+		var MRF = false;
 
-	var fileContent = [];
-	var tileTypes = [];
-	var hierTileTypes = [];
-	var TopDown = false;
-	var NumberMatrices = 0;
-	var DependencyMatrices = [];
-	var DepComplexities = [];
-	var Hierarchical = false;
-	var Rows = [];
+		var fileContent = [];
+		var tileTypes = [];
+		var hierTileTypes = [];
+		var TopDown = false;
+		var NumberMatrices = 0;
+		var DependencyMatrices = [];
+		var DepComplexities = [];
+		var Hierarchical = false;
+		var Rows = [];
 
 
-	var Totals = [];
-	var Probabilities = [];
-	var HierTotals = [];
-	var HierProbabilities = [];
+		var Totals = [];
+		var Probabilities = [];
+		var HierTotals = [];
+		var HierProbabilities = [];
 
-	var TotalMatrix = [];
-	var ProbMatrix = [];
-	var HierTotalMatrix = [];
-	var HierProbMatrix = [];
-	var NumberOfRowSplits;
+		var TotalMatrix = [];
+		var ProbMatrix = [];
+		var HierTotalMatrix = [];
+		var HierProbMatrix = [];
+		var NumberOfRowSplits;
 
-	var MapGen = [];
-	var lookahead;
+		var MapGen = [];
+		var lookahead;
 
-	var mapHeight;
-	var mapWidth;
+		var mapHeight;
+		var mapWidth;
 
-	var BackTracks;
-	var badPipes;
-	var NumberTilesWithEachMatrix = [];
-	var start = 0;
+		var BackTracks;
+		var badPipes;
+		var NumberTilesWithEachMatrix = [];
+		var start = 0;
 
-	function GenerateTopLevelTile(PossibleTiles, h, w, offset, WhichDepMat, depth, method){
+		function GenerateTopLevelTile(PossibleTiles, h, w, offset, WhichDepMat, depth, method){
 
 
 
@@ -333,7 +333,7 @@ for(var i = 0; i < MapGen.length; i++){
 			if(i < MapGen.length - 1 && char == "#"){
 				createNewImage("mario","#2");
 			}else if (char == "e"){
-				if(MapGen[i+1][j] != null){
+				if(i + 1 < mapHeight){
 					if(MapGen[i+1][j] == "-"){
 						createNewImage("mario","EA");
 					}
@@ -341,20 +341,20 @@ for(var i = 0; i < MapGen.length; i++){
 						
 						var chooseOne = Math.floor((Math.random() * 2) + 1);
 						if(chooseOne == 1){
-createNewImage("mario","EF");
+							createNewImage("mario","EF");
 						}else{
 							createNewImage("mario","EF2");
 						}
 						
 					}
 				}else{
-					createNewImage("mario","E");
+					createNewImage("mario","EF");
 				}
 
 			}
 
 			else if (char == "p"){
-				if(MapGen[i-1][j] != null){
+				if(i - 1 >= 0){
 					if(MapGen[i-1][j] != "p"){
 						createNewImage("mario","PT");
 					}
@@ -362,10 +362,10 @@ createNewImage("mario","EF");
 						createNewImage("mario",MapGen[i][j]);
 					}
 				}else{
-					createNewImage("mario","E");
+					createNewImage("mario",MapGen[i][j]);
 				}
 			}else if (char == "P"){
-				if(MapGen[i-1][j] != null){
+				if(i - 1 >= 0){
 					if(MapGen[i-1][j] != "P"){
 						createNewImage("mario","PT2");
 					}
@@ -373,7 +373,7 @@ createNewImage("mario","EF");
 						createNewImage("mario",MapGen[i][j]);
 					}
 				}else{
-					createNewImage("mario","E");
+					createNewImage("mario",MapGen[i][j]);
 				}
 			}
 
@@ -388,15 +388,17 @@ createNewImage("mario","EF");
 
 			if(char == "#"){
 				if(i > 0 && i > top){
-					if(MapGen[i-1][j] != "#"){
-						createNewImage("kidIcarus","F2");
-					}
-					else{
-						if(i <= top){
-							createNewImage("kidIcarus","F3");
-						}else{
+					if(i - 1 >= 0){
+						if(MapGen[i-1][j] != "#"){
+							createNewImage("kidIcarus","F2");
+						}
+						else{
+							if(i <= top){
+								createNewImage("kidIcarus","F3");
+							}else{
 
-							createNewImage("kidIcarus",MapGen[i][j]);
+								createNewImage("kidIcarus",MapGen[i][j]);
+							}
 						}
 					}
 				}
@@ -415,15 +417,17 @@ createNewImage("mario","EF");
 
 
 					if(i > 0){
-						if(MapGen[i-1][j] != "D"){
-							createNewImage("kidIcarus","DT2");
+						if(i - 1 >= 0){
+							if(MapGen[i-1][j] != "D"){
+								createNewImage("kidIcarus","DT2");
+							}
+							else{
+								createNewImage("kidIcarus","DT");
+							}
 						}
 						else{
 							createNewImage("kidIcarus","DT");
 						}
-					}
-					else{
-						createNewImage("kidIcarus","DT");
 					}
 
 				}
@@ -431,30 +435,34 @@ createNewImage("mario","EF");
 
 
 					if(i > 0){
-						if(MapGen[i-1][j] != "D"){
-							createNewImage("kidIcarus","DB2");
+						if(i - 1 >= 0){
+							if(MapGen[i-1][j] != "D"){
+								createNewImage("kidIcarus","DB2");
+							}
+							else{
+								createNewImage("kidIcarus","DB");
+							}
 						}
 						else{
 							createNewImage("kidIcarus","DB");
 						}
-					}
-					else{
-						createNewImage("kidIcarus","DB");
 					}
 
 				}else{
 
 
 					if(i > 0){
-						if(MapGen[i-1][j] != "D"){
-							createNewImage("kidIcarus","D2");
+						if(i - 1 >= 0){
+							if(MapGen[i-1][j] != "D"){
+								createNewImage("kidIcarus","D2");
+							}
+							else{
+								createNewImage("kidIcarus",MapGen[i][j]);
+							}
 						}
 						else{
 							createNewImage("kidIcarus",MapGen[i][j]);
 						}
-					}
-					else{
-						createNewImage("kidIcarus",MapGen[i][j]);
 					}
 				}
 
@@ -734,13 +742,13 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 
 
 				ID = 0;
-				id = 0;
+				
 				P = 0;
 				
 				for (var i = 0; i < DependencyMatrices[WhichDepMat].length; i++){
+					id = 0;
 
-
-					for (var j =0; j < DependencyMatrices[WhichDepMat][i].length; j++){
+					for (var j =0; j < DependencyMatrices[WhichDepMat][i].length ; j++){
 
 
 						if (DependencyMatrices[WhichDepMat][i][j] == 1){
@@ -762,7 +770,8 @@ function SetTotalsTopLevel(WhichDepMat, numberOfTrainingMaps){
 							}
 							ID += id * Math.pow(numTypes, P);
 							P++;
-						}							
+						}
+
 					}
 				}
 				
@@ -1313,7 +1322,7 @@ function MdMCExperiments(){
 			}
 		}
 		else if (gameName == "superMarioBros"){
-			for (var i = 1; i <= 16; i++){
+			for (var i = 1; i <= 1; i++){
 				jQuery.get('Mario_Maps/mario_'+i+'.txt', function(data) {
 					fileContent.push(data);
 
@@ -1502,7 +1511,7 @@ function MdMCExperiments(){
 
 	}
 
-	</script>
+</script>
 
 </script>
 
